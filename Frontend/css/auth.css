@@ -1,0 +1,272 @@
+/* =============================================
+   SEWA NOW — auth.css (Fixed for Premium UI)
+   ============================================= */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { 
+    font-family: 'Segoe UI', sans-serif; 
+    background: #ffffff; 
+    min-height: 100vh; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
+
+/* ── Main Container (Full Screen Edge-to-Edge) ── */
+.auth-wrapper { 
+    display: flex; 
+    width: 100vw;         /* Screen 100% width */
+    max-width: 100%;    
+    min-height: 100vh; 
+    box-shadow: none;   
+    border-radius: 0;     
+    overflow: hidden; 
+    background: #fff;
+}
+
+/* ── Left Panel (Orange side with Black text) ── */
+.auth-left { 
+    flex: 1; 
+    background: linear-gradient(145deg, #F97316, #ea580c); 
+    padding: 48px 40px; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+}
+
+.auth-left h1 { 
+    font-size: 38px; 
+    font-weight: 800; 
+    margin-bottom: 8px; 
+    color: #111827; /* Dark text */
+}
+
+.auth-left p { 
+    font-size: 16px; 
+    margin-bottom: 40px; 
+    color: #111827; /* Dark text */
+    font-weight: 500;
+}
+
+.feature { 
+    display: flex; 
+    align-items: center; 
+    gap: 15px;
+    margin-bottom: 25px; 
+}
+
+.feature-icon { 
+    width: 42px; 
+    height: 42px; 
+    background: rgba(0,0,0,0.1); 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: bold;
+    color: #111827; /* Dark icon */
+}
+
+.feature-text { 
+    font-size: 15px; 
+    color: #111827; /* Dark text */
+    font-weight: 600;
+}
+
+/* ── Right Panel (White Form Area) ── */
+.auth-right { 
+    flex: 1.2; 
+    background: #fff; 
+    padding: 5% 10%; 
+    overflow-y: auto; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.auth-right h2 { 
+    font-size: 26px; 
+    font-weight: 700; 
+    color: #1a1a2e; 
+    margin-bottom: 6px; 
+}
+
+.auth-right .subtitle { 
+    font-size: 15px; 
+    color: #666; 
+    margin-bottom: 30px; 
+}
+
+/* ── Tabs & Toggles ── */
+.tabs { 
+    display: flex; 
+    gap: 0; 
+    margin-bottom: 28px; 
+    border-bottom: 2px solid #f0f0f0; 
+}
+
+.tab { 
+    flex: 1; 
+    padding: 12px; 
+    text-align: center; 
+    cursor: pointer; 
+    font-size: 15px;
+    font-weight: 600; 
+    color: #888; 
+    border-bottom: 3px solid transparent; 
+    margin-bottom: -2px; 
+    transition: 0.3s;
+}
+
+.tab.active { 
+    color: #F97316; 
+    border-bottom-color: #F97316; 
+}
+
+.method-toggle { 
+    display: flex; 
+    background: #f7f7f7; 
+    border-radius: 10px; 
+    padding: 5px; 
+    margin-bottom: 24px; 
+}
+
+.method-btn { 
+    flex: 1; 
+    padding: 10px; 
+    border: none; 
+    background: transparent; 
+    border-radius: 8px; 
+    font-size: 14px;
+    font-weight: 600; 
+    color: #666; 
+    cursor: pointer; 
+    transition: 0.3s;
+}
+
+.method-btn.active { 
+    background: #fff; 
+    color: #1a1a2e; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+}
+
+/* ── Form Elements ── */
+.form-group { margin-bottom: 20px; }
+.form-group label { 
+    display: block; 
+    font-size: 14px; 
+    font-weight: 600; 
+    color: #444; 
+    margin-bottom: 8px; 
+}
+
+input[type="text"], input[type="email"], input[type="password"], input[type="tel"], input[type="number"], select {
+    width: 100%; 
+    padding: 12px 15px; 
+    border: 1px solid #ddd; 
+    border-radius: 8px; 
+    font-size: 15px; 
+    outline: none; 
+    transition: border-color 0.3s;
+}
+input:focus, select:focus { border-color: #F97316; }
+
+.phone-prefix { 
+    display: flex; 
+    align-items: center; 
+    border: 1px solid #ddd; 
+    border-radius: 8px; 
+    overflow: hidden; 
+}
+.phone-prefix .prefix-box { 
+    padding: 12px 15px; 
+    background: #f7f7f7; 
+    border-right: 1px solid #ddd; 
+    font-weight: 600; 
+    color: #555; 
+}
+.phone-prefix input { border: none; border-radius: 0; }
+
+.btn-primary { 
+    width: 100%; 
+    padding: 14px; 
+    background: #F97316; 
+    color: #fff; 
+    border: none; 
+    border-radius: 8px; 
+    font-size: 16px; 
+    font-weight: 600; 
+    cursor: pointer; 
+    transition: 0.3s; 
+    margin-top: 10px;
+}
+.btn-primary:hover { background: #ea580c; }
+.btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+
+.switch-link { text-align: center; margin-top: 24px; font-size: 14px; color: #666; }
+.switch-link a { color: #F97316; font-weight: 600; cursor: pointer; text-decoration: none; }
+
+/* ── Misc Classes ── */
+.msg { padding: 12px; border-radius: 8px; margin-bottom: 20px; display: none; font-size: 14px; font-weight: 500; }
+.msg.show { display: block; }
+.msg.error { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+.msg.success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+
+.otp-row { display: flex; gap: 10px; }
+.send-otp-btn { padding: 0 20px; background: #eee; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+#countdown { margin-top: 8px; font-size: 13px; color: #F97316; font-weight: 600; }
+
+.role-toggle { display: flex; gap: 10px; }
+.role-btn { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; text-align: center; cursor: pointer; color: #666; transition: 0.3s; font-weight: 500;}
+.role-btn.active { border-color: #F97316; background: #fff8f3; color: #F97316; font-weight: 600; }
+#worker-fields { margin-top: 20px; padding-top: 20px; border-top: 1px dashed #ddd; display: none; }
+#worker-fields.show { display: block; }
+/* =============================================
+   RESPONSIVE DESIGN (for every device screen)
+   ============================================= */
+
+/* Tablet & Medium Laptops ( less than 900px ) */
+@media (max-width: 900px) {
+    .auth-wrapper {
+        flex-direction: column; 
+        min-height: auto;
+        height: auto;
+        margin: 20px 0;
+    }
+    .auth-left {
+        padding: 40px 30px;
+        align-items: center;    /* for adjusting text into center  */
+        text-align: center;
+    }
+    .feature {
+        justify-content: center; /* Icons center  */
+    }
+    .auth-right {
+        padding: 40px 30px;
+    }
+}
+
+/* Mobile Screens (480px and below) */
+@media (max-width: 480px) {
+    .auth-wrapper {
+        width: 100vw;           /* for Mobile full width */
+        margin: 0;
+        border-radius: 0;      
+    }
+    .auth-left {
+        padding: 30px 20px;
+    }
+    .auth-left h1 {
+        font-size: 32px;
+    }
+    .auth-right {
+        padding: 30px 20px;
+    }
+    .auth-right h2 {
+        font-size: 22px;
+    }
+    .btn-primary {
+        padding: 12px;
+    }
+}

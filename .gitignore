@@ -1,0 +1,11 @@
+# Python caches
+__pycache__/
+*.pyc
+
+# Firebase Secret Keys (CRITICAL!)
+backend/serviceAccountKey.json
+
+# Environment variables & local environment
+.env
+venv/
+.vscode/

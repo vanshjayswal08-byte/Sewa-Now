@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login / Register | Sewa Now</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body>
+
+<div class="auth-wrapper">
+
+  <!-- ── Left Panel ── -->
+  <div class="auth-left">
+    <h1>Sewa<span style="opacity:0.8">Now</span></h1>
+    <p>Local services at your fingertips</p>
+    <div class="feature">
+      <div class="feature-icon">✓</div>
+      <div class="feature-text">500+ Verified Workers near you</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-text">Book in under 2 minutes</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔒</div>
+      <div class="feature-text">Secure OTP-based login</div>
+    </div>
+  </div>
+
+  <!-- ── Right Panel ── -->
+  <div class="auth-right">
+
+    <!-- Tab switcher -->
+    <div class="tabs">
+      <div class="tab active" id="tab-login"    onclick="switchTab('login')">Login</div>
+      <div class="tab"        id="tab-register" onclick="switchTab('register')">Register</div>
+    </div>
+
+    <!-- Message box -->
+    <div class="msg" id="msg"></div>
+
+    <!-- ════ LOGIN PANEL ════ -->
+    <div id="panel-login">
+      <h2>Welcome back</h2>
+      <p class="subtitle">Login to manage your bookings</p>
+
+      <!-- Phone / Email toggle -->
+      <div class="method-toggle">
+        <button class="method-btn active" id="login-phone-btn" onclick="setLoginMethod('phone')">📱 Phone OTP</button>
+        <button class="method-btn"        id="login-email-btn" onclick="setLoginMethod('email')">✉️ Email</button>
+      </div>
+
+      <!-- PHONE LOGIN -->
+      <div id="login-phone-section">
+        <div class="form-group">
+          <label>Phone Number</label>
+          <div class="phone-prefix">
+            <span class="prefix-box">🇮🇳 +91</span>
+            <input type="tel" id="login-phone" placeholder="9876543210" maxlength="10" />
+          </div>
+        </div>
+
+        <div class="form-group" id="login-otp-group" style="display:none">
+          <label>Enter OTP</label>
+          <div class="otp-row">
+            <input type="number" id="login-otp" placeholder="------" />
+            <button class="send-otp-btn" id="resend-btn" onclick="sendLoginOTP()" disabled>Resend</button>
+          </div>
+          <div id="countdown"></div>
+        </div>
+
+        <div id="recaptcha-container"></div>
+        <button class="btn-primary" id="login-phone-submit" onclick="handlePhoneLogin()">Send OTP</button>
+      </div>
+
+      <!-- EMAIL LOGIN -->
+      <div id="login-email-section" style="display:none">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="login-email" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" />
+        </div>
+        <button class="btn-primary" onclick="handleEmailLogin()">Login</button>
+      </div>
+
+      <div class="switch-link">Don't have an account? <a onclick="switchTab('register')">Register here</a></div>
+    </div>
+
+    <!-- ════ REGISTER PANEL ════ -->
+    <div id="panel-register" style="display:none">
+      <h2>Create account</h2>
+      <p class="subtitle">Join thousands using Sewa Now</p>
+
+      <!-- Phone / Email toggle -->
+      <div class="method-toggle">
+        <button class="method-btn active" id="reg-phone-btn" onclick="setRegMethod('phone')">📱 Phone OTP</button>
+        <button class="method-btn"        id="reg-email-btn" onclick="setRegMethod('email')">✉️ Email</button>
+      </div>
+
+      <!-- Role selector -->
+      <div class="form-group">
+        <label>I am a</label>
+        <div class="role-toggle">
+          <div class="role-btn active" id="role-customer" onclick="setRole('customer')">👤 Customer</div>
+          <div class="role-btn"        id="role-worker"   onclick="setRole('worker')">🔧 Worker</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="reg-name" placeholder="Rahul Sharma" />
+      </div>
+
+      <div class="form-group">
+        <label>City</label>
+        <input type="text" id="reg-city" placeholder="Dehradun" />
+      </div>
+
+      <!-- PHONE REGISTER -->
+      <div id="reg-phone-section">
+        <div class="form-group">
+          <label>Phone Number</label>
+          <div class="phone-prefix">
+            <span class="prefix-box">🇮🇳 +91</span>
+            <input type="tel" id="reg-phone" placeholder="9876543210" maxlength="10" />
+          </div>
+        </div>
+        <div class="form-group" id="reg-otp-group" style="display:none">
+          <label>Enter OTP</label>
+          <div class="otp-row">
+            <input type="number" id="reg-otp" placeholder="------" />
+          </div>
+        </div>
+        <div id="recaptcha-container-reg"></div>
+      </div>
+
+      <!-- EMAIL REGISTER -->
+      <div id="reg-email-section" style="display:none">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="reg-email" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Password <span style="color:#bbb;font-weight:400">(min 6 chars)</span></label>
+          <input type="password" id="reg-password" placeholder="••••••••" />
+        </div>
+      </div>
+
+      <!-- Worker extra fields -->
+      <div id="worker-fields">
+        <div class="form-group">
+          <label>Service Category</label>
+          <select id="reg-category">
+            <option value="">Select category</option>
+            <option value="plumber">Plumber</option>
+            <option value="electrician">Electrician</option>
+            <option value="carpenter">Carpenter</option>
+            <option value="painter">Painter</option>
+            <option value="cleaner">Cleaner</option>
+            <option value="mechanic">Mechanic</option>
+            <option value="gardener">Gardener</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Years of Experience</label>
+          <input type="number" id="reg-experience" placeholder="3" min="0" max="50" />
+        </div>
+        <div class="form-group">
+          <label>Short Bio</label>
+          <input type="text" id="reg-bio" placeholder="Expert plumber with 5 years experience..." />
+        </div>
+      </div>
+
+      <button class="btn-primary" id="reg-submit-btn" onclick="handleRegister()">
+        Create Account →
+      </button>
+
+      <div class="switch-link">Already have an account? <a onclick="switchTab('login')">Login here</a></div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     Firebase SDK  — REPLACE config with your own values
+     Firebase Console → Project Settings → Your Apps → Web
+════════════════════════════════════════════════════════ -->
+<script type="module">
+  import { initializeApp }                    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, RecaptchaVerifier, signInWithPhoneNumber,
+           signInWithEmailAndPassword, createUserWithEmailAndPassword,
+           onAuthStateChanged,signOut}               from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAC2z-W41mpwXUSTOqZd_4vfBoPyl4cvmk",
+  authDomain: "sewa-now.firebaseapp.com",
+  projectId: "sewa-now",
+  storageBucket: "sewa-now.firebasestorage.app",
+  messagingSenderId: "516011205450",
+  appId: "1:516011205450:web:025c0cbdf18ae136b257b3",
+  measurementId: "G-XRFXN551Q8"
+};    
+  
+  // ────────────────────────────────────────────────────────────────────────
+
+  const app_fb  = initializeApp(firebaseConfig);
+  const auth    = getAuth(app_fb);
+  const API     = "http://127.0.0.1:5000";
+
+  // ── State ────────────────────────────────────────────────────────────────
+  let confirmationResult = null;
+  let loginMethod        = 'phone';
+  let regMethod          = 'phone';
+  let selectedRole       = 'customer';
+  let otpSent            = false;
+  let countdownTimer     = null;
+
+  // ── Expose to global scope (onclick handlers) ────────────────────────────
+  window.switchTab      = switchTab;
+  window.setLoginMethod = setLoginMethod;
+  window.setRegMethod   = setRegMethod;
+  window.setRole        = setRole;
+  window.sendLoginOTP   = sendLoginOTP;
+  window.handlePhoneLogin  = handlePhoneLogin;
+  window.handleEmailLogin  = handleEmailLogin;
+  window.handleRegister    = handleRegister;
+
+  // ── UI Helpers ────────────────────────────────────────────────────────────
+  function showMsg(text, type = 'error') {
+    const el = document.getElementById('msg');
+    el.textContent = text;
+    el.className   = `msg ${type} show`;
+    setTimeout(() => el.classList.remove('show'), 5000);
+  }
+
+  function setBtn(id, text, disabled = false) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text;
+    el.disabled    = disabled;
+  }
+
+  function switchTab(tab) {
+    document.getElementById('panel-login').style.display    = tab === 'login'    ? '' : 'none';
+    document.getElementById('panel-register').style.display = tab === 'register' ? '' : 'none';
+    document.getElementById('tab-login').className    = 'tab' + (tab === 'login'    ? ' active' : '');
+    document.getElementById('tab-register').className = 'tab' + (tab === 'register' ? ' active' : '');
+    document.getElementById('msg').classList.remove('show');
+  }
+
+  function setLoginMethod(m) {
+    loginMethod = m;
+    document.getElementById('login-phone-section').style.display = m === 'phone' ? '' : 'none';
+    document.getElementById('login-email-section').style.display = m === 'email' ? '' : 'none';
+    document.getElementById('login-phone-btn').classList.toggle('active', m === 'phone');
+    document.getElementById('login-email-btn').classList.toggle('active', m === 'email');
+  }
+
+  function setRegMethod(m) {
+    regMethod = m;
+    document.getElementById('reg-phone-section').style.display = m === 'phone' ? '' : 'none';
+    document.getElementById('reg-email-section').style.display = m === 'email' ? '' : 'none';
+    document.getElementById('reg-phone-btn').classList.toggle('active', m === 'phone')
+    document.getElementById('reg-email-btn').classList.toggle('active', m === 'email');
+  }
+
+  function setRole(role) {
+    selectedRole = role;
+    document.getElementById('role-customer').classList.toggle('active', role === 'customer');
+    document.getElementById('role-worker').classList.toggle('active',   role === 'worker');
+    document.getElementById('worker-fields').classList.toggle('show',   role === 'worker');
+  }
+
+  // ── OTP Countdown ─────────────────────────────────────────────────────────
+  function startCountdown(seconds = 30) {
+    const el     = document.getElementById('countdown');
+    const resend = document.getElementById('resend-btn');
+    el.style.display = 'block';
+    resend.disabled  = true;
+    clearInterval(countdownTimer);
+    let remaining = seconds;
+    el.textContent = `Resend in ${remaining}s`;
+    countdownTimer = setInterval(() => {
+      remaining--;
+      el.textContent = remaining > 0 ? `Resend in ${remaining}s` : '';
+      if (remaining <= 0) {
+        clearInterval(countdownTimer);
+        resend.disabled  = false;
+        el.style.display = 'none';
+      }
+    }, 1000);
+  }
+
+  // ── reCAPTCHA setup ───────────────────────────────────────────────────────
+  function setupRecaptcha(containerId) {
+    if (window.recaptchaVerifier) {
+      window.recaptchaVerifier.clear();
+    }
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
+      size: 'invisible',
+      callback: () => {}
+    });
+  }
+
+  // ── After successful Firebase Auth → save/fetch profile ──────────────────
+  async function postAuthFlow(user, extraData = null) {
+    const idToken = await user.getIdToken();
+    localStorage.setItem('sewa_token', idToken);
+    localStorage.setItem('sewa_uid',   user.uid);
+
+    // Check if profile exists
+    const res  = await fetch(`${API}/auth/me`, {
+      headers: { Authorization: `Bearer ${idToken}` }
+    });
+    const json = await res.json();
+
+    if (res.ok && json.success) {
+      // Profile exists → go to dashboard
+      const u = json.data;
+      localStorage.setItem('sewa_user', JSON.stringify(u));
+      showMsg('Login successful! Redirecting...', 'success');
+      setTimeout(() => {
+        window.location.href = u.role === 'worker' ? '../Frontend/worker_list.html' : '../Frontend/index.html';
+      }, 1000);
+    } else if (extraData) {
+      // New user → create profile
+      const createRes  = await fetch(`${API}/auth/complete-profile`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+        body:    JSON.stringify(extraData)
+      });
+      const createJson = await createRes.json();
+      if (createRes.ok && createJson.success) {
+        localStorage.setItem('sewa_user', JSON.stringify(createJson.data));
+        showMsg('Account created! Redirecting...', 'success');
+        setTimeout(() => {
+          window.location.href = createJson.data.role === 'worker' ? '../Frontend/worker_list.html' : '../Frontend/index.html';
+        }, 1000);
+      } else {
+        showMsg(createJson.error || 'Profile setup failed');
+      }
+    } else {
+      // Returning user but profile missing — ask them to complete
+      showMsg('Please complete your profile first.', 'error');
+      switchTab('register');
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  //  LOGIN — PHONE OTP
+  // ════════════════════════════════════════════════════════════════════════
+  async function handlePhoneLogin() {
+    const phone = document.getElementById('login-phone').value.trim();
+
+    if (!otpSent) {
+      // Step 1: Send OTP
+      if (!/^[6-9]\d{9}$/.test(phone)) return showMsg('Enter a valid 10-digit Indian phone number');
+      setBtn('login-phone-submit', 'Sending...', true);
+      try {
+        setupRecaptcha('recaptcha-container');
+        const fullPhone = `+91${phone}`;
+        confirmationResult = await signInWithPhoneNumber(auth, fullPhone, window.recaptchaVerifier);
+        document.getElementById('login-otp-group').style.display = '';
+        setBtn('login-phone-submit', 'Verify OTP', false);
+        document.getElementById('login-phone').disabled = true;
+        otpSent = true;
+        startCountdown(30);
+        showMsg('OTP sent to +91' + phone, 'success');
+      } catch (err) {
+        setBtn('login-phone-submit', 'Send OTP', false);
+        showMsg(err.message || 'Failed to send OTP');
+      }
+    } else {
+      // Step 2: Verify OTP
+      const otp = document.getElementById('login-otp').value.trim();
+      if (otp.length < 6) return showMsg('Enter the 6-digit OTP');
+      setBtn('login-phone-submit', 'Verifying...', true);
+      try {
+        const result = await confirmationResult.confirm(otp);
+        await postAuthFlow(result.user, null);
+      } catch (err) {
+        setBtn('login-phone-submit', 'Verify OTP', false);
+        showMsg('Invalid OTP. Please try again.');
+      }
+    }
+  }
+
+  async function sendLoginOTP() {
+    otpSent = false;
+    document.getElementById('login-phone').disabled = false;
+    document.getElementById('login-otp-group').style.display = 'none';
+    setBtn('login-phone-submit', 'Send OTP', false);
+    await handlePhoneLogin();
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  //  LOGIN — EMAIL
+  // ════════════════════════════════════════════════════════════════════════
+  async function handleEmailLogin() {
+    const email    = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) return showMsg('Email and password required');
+
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      await postAuthFlow(result.user, null);
+    } catch (err) {
+      const msgs = {
+        'auth/user-not-found':  'No account found. Please register first.',
+        'auth/wrong-password':  'Incorrect password.',
+        'auth/invalid-email':   'Invalid email address.',
+        'auth/too-many-requests': 'Too many attempts. Try again later.'
+      };
+      showMsg(msgs[err.code] || err.message);
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  //  REGISTER
+  // ════════════════════════════════════════════════════════════════════════
+  async function handleRegister() {
+    const name = document.getElementById('reg-name').value.trim();
+    const city = document.getElementById('reg-city').value.trim();
+    if (!name) return showMsg('Name is required');
+    if (!city) return showMsg('City is required');
+
+    const extraData = {
+      name,
+      city,
+      role:       selectedRole,
+      category:   document.getElementById('reg-category')?.value   || '',
+      experience: document.getElementById('reg-experience')?.value || 0,
+      bio:        document.getElementById('reg-bio')?.value        || '',
+    };
+
+    setBtn('reg-submit-btn', 'Creating account...', true);
+
+    if (regMethod === 'phone') {
+      await handlePhoneRegister(extraData);
+    } else {
+      await handleEmailRegister(extraData);
+    }
+  }
+
+  // ── Phone Register ────────────────────────────────────────────────────────
+  let regOtpSent = false;
+  let regConfirmation = null;
+
+  async function handlePhoneRegister(extraData) {
+    const phone = document.getElementById('reg-phone').value.trim();
+
+    if (!regOtpSent) {
+      if (!/^[6-9]\d{9}$/.test(phone)) {
+        setBtn('reg-submit-btn', 'Create Account →', false);
+        return showMsg('Enter a valid 10-digit Indian phone number');
+      }
+      try {
+        setupRecaptcha('recaptcha-container-reg');
+        regConfirmation = await signInWithPhoneNumber(auth, `+91${phone}`, window.recaptchaVerifier);
+        document.getElementById('reg-otp-group').style.display = '';
+        document.getElementById('reg-phone').disabled = true;
+        regOtpSent = true;
+        setBtn('reg-submit-btn', 'Verify & Create Account →', false);
+        showMsg('OTP sent to +91' + phone, 'success');
+      } catch (err) {
+        setBtn('reg-submit-btn', 'Create Account →', false);
+        showMsg(err.message || 'Failed to send OTP');
+      }
+    } else {
+      const otp = document.getElementById('reg-otp').value.trim();
+      if (otp.length < 6) {
+        setBtn('reg-submit-btn', 'Verify & Create Account →', false);
+        return showMsg('Enter the 6-digit OTP');
+      }
+      try {
+        const result = await regConfirmation.confirm(otp);
+        extraData.phone = `+91${document.getElementById('reg-phone').value.trim()}`;
+        await postAuthFlow(result.user, extraData);
+      } catch (err) {
+        setBtn('reg-submit-btn', 'Verify & Create Account →', false);
+        showMsg('Invalid OTP. Please try again.');
+      }
+    }
+  }
+
+  // ── Email Register ────────────────────────────────────────────────────────
+  async function handleEmailRegister(extraData) {
+    const email    = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    if (!email)           { setBtn('reg-submit-btn', 'Create Account →', false); return showMsg('Email is required'); }
+    if (password.length < 6) { setBtn('reg-submit-btn', 'Create Account →', false); return showMsg('Password must be at least 6 characters'); }
+
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      extraData.email = email;
+      await postAuthFlow(result.user, extraData);
+    } catch (err) {
+      setBtn('reg-submit-btn', 'Create Account →', false);
+      const msgs = {
+        'auth/email-already-in-use': 'This email is already registered. Please login.',
+        'auth/invalid-email':        'Invalid email address.',
+        'auth/weak-password':        'Password is too weak.'
+      };
+      showMsg(msgs[err.code] || err.message);
+    }
+  }
+
+  // ── Auto-redirect if already logged in ───────────────────────────────────
+  // Flag: sewaLogout() sets this so onAuthStateChanged doesn't redirect back
+  const intentionalLogout = sessionStorage.getItem('sewa_logout') === '1';
+  if (intentionalLogout) {
+    sessionStorage.removeItem('sewa_logout');
+    // Silently sign out Firebase session without showing any error
+    signOut(auth).catch(() => {});
+    // Stay on auth page — don't attach onAuthStateChanged redirect
+  } else {
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return;  // not logged in — stay on page
+
+      // Token refresh + profile check
+      try {
+        const idToken = await user.getIdToken(true);
+        localStorage.setItem('sewa_token', idToken);
+        const res = await fetch(`${API}/auth/me`, {
+          headers: { Authorization: `Bearer ${idToken}` }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success) {
+            localStorage.setItem('sewa_user', JSON.stringify(json.data));
+            const role = json.data.role;
+            window.location.href = role === 'worker' ? 'worker_list.html' : 'index.html';
+          }
+        }
+      } catch(e) {
+        // Network error — stay on page
+      }
+    });
+  }
+
+</script>
+</body>
+</html>

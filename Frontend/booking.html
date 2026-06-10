@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Service | Sewa Now</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/booking.css">
+</head>
+<body>
+
+    <!-- ── NAVBAR ── -->
+    <nav class="navbar">
+        <div class="logo"><h2>Sewa<span>Now</span></h2></div>
+        <div class="hamburger" id="hamburger">
+            <span></span><span></span><span></span>
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="worker_list.html">Find Workers</a></li>
+            <li id="navAuthItem"><a href="auth.html" class="btn-login">Login / Register</a></li>
+        </ul>
+    </nav>
+
+    <!-- Navbar user dropdown -->
+    <script>
+        (function () {
+            var user = null;
+            try { user = JSON.parse(localStorage.getItem('sewa_user')); } catch (e) {}
+
+            var item = document.getElementById('navAuthItem');
+            if (!item || !user) return;
+
+            var initials = user.name
+                ? user.name.split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0,2)
+                : '?';
+
+            var profileLink = user.role === 'worker' ? 'dashboard.html' : 'user-profile.html';
+            var bookingLink = user.role === 'worker' ? 'dashboard.html' : 'user-bookings.html';
+            var adminItem   = user.role === 'admin'
+                ? '<a href="admin.html" class="nav-dd-item"><i class="fas fa-shield-alt"></i> Admin Panel</a>' : '';
+
+            item.className = 'nav-user-menu';
+            item.innerHTML =
+                '<div class="nav-user-btn" id="navUserBtn">' +
+                    '<div class="nav-avatar">' + initials + '</div>' +
+                    '<span class="nav-user-name">' + user.name + '</span>' +
+                    '<i class="fas fa-chevron-down nav-chevron" id="navChevron"></i>' +
+                '</div>' +
+                '<div class="nav-dropdown" id="navDropdown">' +
+                    '<div class="nav-dropdown-header">' +
+                        '<div class="nav-dd-avatar">' + initials + '</div>' +
+                        '<div><strong>' + user.name + '</strong><span>' + (user.email || '') + '</span></div>' +
+                    '</div>' +
+                    '<div class="nav-dropdown-divider"></div>' +
+                    '<a href="' + profileLink + '" class="nav-dd-item"><i class="fas fa-user"></i> My Profile</a>' +
+                    '<a href="' + bookingLink + '" class="nav-dd-item"><i class="fas fa-calendar-check"></i> My Bookings</a>' +
+                    adminItem +
+                    '<div class="nav-dropdown-divider"></div>' +
+                    '<button class="nav-dd-item nav-dd-logout" onclick="(function(){localStorage.removeItem(\'sewa_user\');localStorage.removeItem(\'sewa_user\');localStorage.removeItem(\'sewanow_token\');window.location.href=\'auth.html\';})();">' +
+                        '<i class="fas fa-sign-out-alt"></i> Logout' +
+                    '</button>' +
+                '</div>';
+
+            var btn = document.getElementById('navUserBtn');
+            var dd  = document.getElementById('navDropdown');
+            var ch  = document.getElementById('navChevron');
+            btn.addEventListener('click', function(e){
+                e.stopPropagation();
+                var open = dd.classList.contains('open');
+                dd.classList.toggle('open', !open);
+                ch.classList.toggle('rotated', !open);
+            });
+            document.addEventListener('click', function(){
+                dd.classList.remove('open');
+                ch.classList.remove('rotated');
+            });
+            dd.addEventListener('click', function(e){ e.stopPropagation(); });
+        })();
+    </script>
+
+    <div class="nav-overlay" id="navOverlay"></div>
+
+    <!-- ── LOADING STATE ── -->
+    <div id="loadingState" class="bk-loading">
+        <div class="bk-spinner-wrap">
+            <div class="bk-spinner-ring"></div>
+            <p>Loading Booking…</p>
+        </div>
+    </div>
+
+    <!-- ── ERROR STATE ── -->
+    <div id="errorState" class="bk-error" style="display:none;">
+        <div class="bk-error-inner">
+            <div class="bk-error-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <h2>Something Went Wrong</h2>
+            <p>We couldn't load the worker details. Please try again.</p>
+            <a href="worker_list.html" class="bk-btn-back">
+                <i class="fas fa-arrow-left"></i> Browse Workers
+            </a>
+        </div>
+    </div>
+
+    <!-- ── SUCCESS / CONFIRMATION ── -->
+    <div id="successState" class="bk-success" style="display:none;">
+        <div class="bk-success-inner">
+            <div class="bk-success-lottie">
+                <div class="bk-checkmark">
+                    <svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
+                        <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                        <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                    </svg>
+                </div>
+            </div>
+            <h2>Booking Confirmed! 🎉</h2>
+            <p class="success-sub">Your booking has been placed successfully.</p>
+
+            <div class="bk-confirm-card" id="confirmCard">
+                <!-- filled by JS -->
+            </div>
+
+            <div class="bk-success-actions">
+                <a href="index.html" class="bk-btn-home">
+                    <i class="fas fa-home"></i> Go Home
+                </a>
+                <a href="user-bookings.html" class="bk-btn-more">
+                    <i class="fas fa-calendar-check"></i> My Bookings
+                </a>
+            </div>
+
+            <p class="bk-sms-note">
+                <i class="fas fa-sms"></i> A confirmation SMS will be sent to your number.
+            </p>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         MAIN BOOKING PAGE
+    ══════════════════════════════════════ -->
+    <main id="bookingMain" style="display:none;">
+
+        <!-- ── PAGE HEADER ── -->
+        <div class="bk-page-header">
+            <div class="bk-header-bg"></div>
+            <div class="bk-header-inner">
+                <a href="#" id="backToProfile" class="bk-back-link">
+                    <i class="fas fa-arrow-left"></i> Back to Profile
+                </a>
+                <h1>Book Your Service</h1>
+                <p>Complete the form below — takes less than 2 minutes</p>
+            </div>
+        </div>
+
+        <!-- ── PROGRESS BAR ── -->
+        <div class="bk-progress-wrap">
+            <div class="bk-progress-bar">
+                <div class="bk-progress-fill" id="progressFill"></div>
+            </div>
+            <div class="bk-steps-row">
+                <div class="bk-step active" data-step="1">
+                    <div class="bk-step-dot"><i class="fas fa-user"></i></div>
+                    <span>Your Details</span>
+                </div>
+                <div class="bk-step-line"></div>
+                <div class="bk-step" data-step="2">
+                    <div class="bk-step-dot"><i class="fas fa-calendar-alt"></i></div>
+                    <span>Date & Time</span>
+                </div>
+                <div class="bk-step-line"></div>
+                <div class="bk-step" data-step="3">
+                    <div class="bk-step-dot"><i class="fas fa-map-marker-alt"></i></div>
+                    <span>Address</span>
+                </div>
+                <div class="bk-step-line"></div>
+                <div class="bk-step" data-step="4">
+                    <div class="bk-step-dot"><i class="fas fa-check"></i></div>
+                    <span>Review</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── MAIN GRID ── -->
+        <div class="bk-main-grid">
+
+            <!-- LEFT: FORM PANELS -->
+            <div class="bk-form-area">
+
+                <!-- ── STEP 1: Your Details ── -->
+                <div class="bk-panel active" id="step1">
+                    <div class="bk-panel-header">
+                        <div class="bk-panel-num">01</div>
+                        <div>
+                            <h3>Your Details</h3>
+                            <p>How should the worker contact you?</p>
+                        </div>
+                    </div>
+
+                    <div class="bk-form-grid">
+                        <div class="bk-field">
+                            <label for="custName">
+                                <i class="fas fa-user"></i> Full Name <span class="req">*</span>
+                            </label>
+                            <input type="text" id="custName" placeholder="e.g. Rahul Kumar" autocomplete="name">
+                            <span class="bk-field-error" id="errCustName"></span>
+                        </div>
+
+                        <div class="bk-field">
+                            <label for="custPhone">
+                                <i class="fas fa-phone"></i> Phone Number <span class="req">*</span>
+                            </label>
+                            <div class="bk-phone-wrap">
+                                <span class="bk-country-code">+91</span>
+                                <input type="tel" id="custPhone" placeholder="98765 43210" maxlength="10" autocomplete="tel">
+                            </div>
+                            <span class="bk-field-error" id="errCustPhone"></span>
+                        </div>
+
+                        <div class="bk-field full-width">
+                            <label for="custEmail">
+                                <i class="fas fa-envelope"></i> Email <span class="opt">(optional)</span>
+                            </label>
+                            <input type="email" id="custEmail" placeholder="your@email.com" autocomplete="email">
+                        </div>
+
+                        <div class="bk-field full-width">
+                            <label>
+                                <i class="fas fa-tools"></i> Service Type <span class="req">*</span>
+                            </label>
+                            <div class="bk-service-chips" id="serviceChips">
+                                <!-- filled by JS based on worker category -->
+                            </div>
+                            <span class="bk-field-error" id="errServiceType"></span>
+                        </div>
+
+                        <div class="bk-field full-width">
+                            <label for="custNote">
+                                <i class="fas fa-sticky-note"></i> Additional Notes <span class="opt">(optional)</span>
+                            </label>
+                            <textarea id="custNote" placeholder="Describe your problem or any special instructions…" rows="3"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="bk-panel-footer">
+                        <span></span>
+                        <button class="bk-btn-next" onclick="BookingApp.nextStep()">
+                            Next: Date & Time <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── STEP 2: Date & Time ── -->
+                <div class="bk-panel" id="step2">
+                    <div class="bk-panel-header">
+                        <div class="bk-panel-num">02</div>
+                        <div>
+                            <h3>Date & Time</h3>
+                            <p>When do you need the service?</p>
+                        </div>
+                    </div>
+
+                    <!-- Calendar -->
+                    <div class="bk-calendar-section">
+                        <div class="bk-cal-header">
+                            <button class="bk-cal-nav" id="calPrev"><i class="fas fa-chevron-left"></i></button>
+                            <h4 id="calMonthYear">Month Year</h4>
+                            <button class="bk-cal-nav" id="calNext"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                        <div class="bk-cal-weekdays">
+                            <span>Sun</span><span>Mon</span><span>Tue</span>
+                            <span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                        </div>
+                        <div class="bk-cal-grid" id="calGrid"></div>
+                        <span class="bk-field-error" id="errDate"></span>
+                    </div>
+
+                    <!-- Time Slots -->
+                    <div class="bk-timeslot-section">
+                        <h4 class="bk-timeslot-title">
+                            <i class="fas fa-clock"></i> Available Time Slots
+                            <span id="selectedDateLabel"></span>
+                        </h4>
+                        <div class="bk-timeslots" id="timeSlots">
+                            <!-- filled by JS -->
+                        </div>
+                        <span class="bk-field-error" id="errTime"></span>
+                    </div>
+
+                    <div class="bk-panel-footer">
+                        <button class="bk-btn-prev" onclick="BookingApp.prevStep()">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button class="bk-btn-next" onclick="BookingApp.nextStep()">
+                            Next: Address <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── STEP 3: Address ── -->
+                <div class="bk-panel" id="step3">
+                    <div class="bk-panel-header">
+                        <div class="bk-panel-num">03</div>
+                        <div>
+                            <h3>Service Address</h3>
+                            <p>Where should the worker come?</p>
+                        </div>
+                    </div>
+
+                    <div class="bk-form-grid">
+                        <div class="bk-field full-width">
+                            <label for="addrLine1">
+                                <i class="fas fa-home"></i> House / Flat No. & Street <span class="req">*</span>
+                            </label>
+                            <input type="text" id="addrLine1" placeholder="e.g. H-42, Shastri Nagar" autocomplete="address-line1">
+                            <span class="bk-field-error" id="errAddr1"></span>
+                        </div>
+
+                        <div class="bk-field full-width">
+                            <label for="addrLine2">
+                                <i class="fas fa-map"></i> Landmark / Area <span class="opt">(optional)</span>
+                            </label>
+                            <input type="text" id="addrLine2" placeholder="Near metro station, landmark…" autocomplete="address-line2">
+                        </div>
+
+                        <div class="bk-field">
+                            <label for="addrCity">
+                                <i class="fas fa-city"></i> City <span class="req">*</span>
+                            </label>
+                            <input type="text" id="addrCity" placeholder="e.g. Meerut" autocomplete="address-level2">
+                            <span class="bk-field-error" id="errCity"></span>
+                        </div>
+
+                        <div class="bk-field">
+                            <label for="addrPin">
+                                <i class="fas fa-thumbtack"></i> PIN Code <span class="req">*</span>
+                            </label>
+                            <input type="text" id="addrPin" placeholder="e.g. 250001" maxlength="6" autocomplete="postal-code">
+                            <span class="bk-field-error" id="errPin"></span>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="bk-field full-width">
+                            <label>
+                                <i class="fas fa-wallet"></i> Payment Method <span class="req">*</span>
+                            </label>
+                            <div class="bk-payment-options">
+                                <label class="bk-pay-opt selected" data-val="cash">
+                                    <input type="radio" name="payMethod" value="cash" checked>
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>Cash on Service</span>
+                                </label>
+                                <label class="bk-pay-opt" data-val="upi">
+                                    <input type="radio" name="payMethod" value="upi">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    <span>UPI / GPay</span>
+                                </label>
+                                <label class="bk-pay-opt" data-val="online">
+                                    <input type="radio" name="payMethod" value="online">
+                                    <i class="fas fa-credit-card"></i>
+                                    <span>Online Payment</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bk-panel-footer">
+                        <button class="bk-btn-prev" onclick="BookingApp.prevStep()">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button class="bk-btn-next" onclick="BookingApp.nextStep()">
+                            Review Booking <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── STEP 4: Review & Confirm ── -->
+                <div class="bk-panel" id="step4">
+                    <div class="bk-panel-header">
+                        <div class="bk-panel-num">04</div>
+                        <div>
+                            <h3>Review & Confirm</h3>
+                            <p>Check all details before confirming</p>
+                        </div>
+                    </div>
+
+                    <!-- Review Sections -->
+                    <div class="bk-review-grid" id="reviewGrid">
+                        <!-- filled by JS -->
+                    </div>
+
+                    <!-- Terms -->
+                    <div class="bk-terms-row">
+                        <label class="bk-terms-check">
+                            <input type="checkbox" id="agreeTerms">
+                            <span class="bk-checkbox-custom"></span>
+                            <span>I agree to the <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a></span>
+                        </label>
+                        <span class="bk-field-error" id="errTerms"></span>
+                    </div>
+
+                    <div class="bk-panel-footer">
+                        <button class="bk-btn-prev" onclick="BookingApp.prevStep()">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button class="bk-btn-confirm" id="confirmBtn" onclick="BookingApp.submitBooking()">
+                            <span class="bk-btn-text">
+                                <i class="fas fa-calendar-check"></i> Confirm Booking
+                            </span>
+                            <span class="bk-btn-loading" style="display:none;">
+                                <span class="bk-btn-spinner"></span> Processing…
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT: WORKER SUMMARY CARD (sticky) -->
+            <aside class="bk-summary-aside">
+                <div class="bk-summary-card" id="summaryCard">
+                    <!-- Worker Info -->
+                    <div class="bk-summary-worker">
+                        <div class="bk-sum-avatar" id="sumAvatar">??</div>
+                        <div class="bk-sum-info">
+                            <h4 id="sumName">Worker Name</h4>
+                            <p id="sumCategory"><i class="fas fa-tools"></i> Service</p>
+                            <div class="bk-sum-rating">
+                                <span id="sumStars"></span>
+                                <span id="sumRatingVal">0.0</span>
+                                <span class="bk-sum-reviews" id="sumReviews">(0 reviews)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bk-sum-divider"></div>
+
+                    <!-- Booking Details (live updates) -->
+                    <div class="bk-sum-details">
+                        <h5><i class="fas fa-clipboard-list"></i> Booking Summary</h5>
+
+                        <div class="bk-sum-row" id="sumRowService">
+                            <span class="bk-sum-key"><i class="fas fa-wrench"></i> Service</span>
+                            <span class="bk-sum-val" id="sumService">—</span>
+                        </div>
+                        <div class="bk-sum-row" id="sumRowDate">
+                            <span class="bk-sum-key"><i class="fas fa-calendar"></i> Date</span>
+                            <span class="bk-sum-val" id="sumDate">—</span>
+                        </div>
+                        <div class="bk-sum-row" id="sumRowTime">
+                            <span class="bk-sum-key"><i class="fas fa-clock"></i> Time</span>
+                            <span class="bk-sum-val" id="sumTime">—</span>
+                        </div>
+                        <div class="bk-sum-row" id="sumRowAddress">
+                            <span class="bk-sum-key"><i class="fas fa-map-marker-alt"></i> Location</span>
+                            <span class="bk-sum-val" id="sumAddress">—</span>
+                        </div>
+                        <div class="bk-sum-row" id="sumRowPayment">
+                            <span class="bk-sum-key"><i class="fas fa-wallet"></i> Payment</span>
+                            <span class="bk-sum-val" id="sumPayment">Cash on Service</span>
+                        </div>
+                    </div>
+
+                    <div class="bk-sum-divider"></div>
+
+                    <!-- Price Breakdown -->
+                    <div class="bk-sum-price">
+                        <div class="bk-sum-price-row">
+                            <span>Service Charge</span>
+                            <span id="sumPriceBase">₹0</span>
+                        </div>
+                        <div class="bk-sum-price-row">
+                            <span>Platform Fee</span>
+                            <span class="bk-free-tag">FREE</span>
+                        </div>
+                        <div class="bk-sum-price-row bk-sum-total">
+                            <span>Total</span>
+                            <span id="sumPriceTotal">₹0</span>
+                        </div>
+                    </div>
+
+                    <!-- Trust badges -->
+                    <div class="bk-trust-badges">
+                        <div class="bk-trust-badge">
+                            <i class="fas fa-shield-alt"></i> Verified Worker
+                        </div>
+                        <div class="bk-trust-badge">
+                            <i class="fas fa-undo"></i> Free Cancellation
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Need help? -->
+                <div class="bk-help-card">
+                    <i class="fas fa-headset"></i>
+                    <div>
+                        <strong>Need Help?</strong>
+                        <p>Call us at <a href="tel:+919876543210">+91 98765 43210</a></p>
+                    </div>
+                </div>
+            </aside>
+
+        </div><!-- /.bk-main-grid -->
+
+    </main><!-- /#bookingMain -->
+
+    <!-- ── FOOTER ── -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h3 class="logo-footer">Sewa<span>Now</span></h3>
+                <p>Connecting you with trusted local professionals for all your home service needs.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="worker_list.html">Find Workers</a></li>
+                    <li><a href="auth.html">Login / Register</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="#">Plumber</a></li>
+                    <li><a href="#">Electrician</a></li>
+                    <li><a href="#">Carpenter</a></li>
+                    <li><a href="#">Painter</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Contact</h4>
+                <ul>
+                    <li><i class="fas fa-phone"></i> +91 98765 43210</li>
+                    <li><i class="fas fa-envelope"></i> hello@sewanow.in</li>
+                    <li><i class="fas fa-map-marker-alt"></i> India</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Sewa Now Project | Designed by Your College Team</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="js/booking.js"></script>
+
+    <script type="module">
+        import { initializeApp }        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp }
+                                        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey            : "AIzaSyAC2z-W41mpwXUSTOqZd_4vfBoPyl4cvmk",
+            authDomain        : "sewa-now.firebaseapp.com",
+            projectId         : "sewa-now",
+            storageBucket     : "sewa-now.firebasestorage.app",
+            messagingSenderId : "516011205450",
+            appId             : "1:516011205450:web:025c0cbdf18ae136b257b3",
+            measurementId     : "G-XRFXN551Q8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db  = getFirestore(app);
+
+        const params   = new URLSearchParams(window.location.search);
+        const workerId = params.get('id');
+
+        if (!workerId) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display   = 'flex';
+        } else {
+            try {
+                const docRef  = doc(db, 'workers', workerId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const workerData = { id: docSnap.id, ...docSnap.data() };
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('bookingMain').style.display  = 'block';
+                    BookingApp.init(workerData);
+
+                    /* Expose Firebase addDoc for booking submission */
+                    window._firebaseSubmit = async function (bookingData) {
+                        const ref = await addDoc(collection(db, 'bookings'), {
+                            ...bookingData,
+                            createdAt: serverTimestamp()
+                        });
+                        return ref.id;
+                    };
+                } else {
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('errorState').style.display   = 'flex';
+                }
+            } catch (err) {
+                console.error('Firebase error:', err);
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('errorState').style.display   = 'flex';
+            }
+        }
+    </script>
+    <script src="js/auth.js"></script> 
+
+</body>
+</html>

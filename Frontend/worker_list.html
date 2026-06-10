@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Workers | Sewa Now</title>
+
+    <!-- Same fonts as index.html -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Shared stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Worker List stylesheet -->
+    <link rel="stylesheet" href="css/worker.css">
+</head>
+<body>
+
+    <!-- ===================== NAVBAR (same as index.html) ===================== -->
+    <nav class="navbar">
+        <div class="logo">
+            <h2>Sewa<span>Now</span></h2>
+        </div>
+        <div class="hamburger" id="hamburger">
+            <span></span><span></span><span></span>
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="worker_list.html" class="active" style="color:var(--saffron)">Find Workers</a></li>
+            <li id="navAuthItem"><a href="auth.html" class="btn-login">Login / Register</a></li>
+        </ul>
+    </nav>
+
+    <!-- ── Navbar Login State Script ── -->
+    <script>
+        (function () {
+            var user = null;
+            // ✅ FIX: 'sewa_user' → 'sewa_user'
+            try { user = JSON.parse(localStorage.getItem('sewa_user')); } catch (e) {}
+
+            if (user && user.name) {
+                var item = document.getElementById('navAuthItem');
+                if (!item) return;
+
+                var initials = user.name
+                    .split(' ')
+                    .map(function(w){ return w[0]; })
+                    .join('')
+                    .toUpperCase()
+                    .slice(0, 2);
+
+                var profileLink = 'user-profile.html';
+                if (user.role === 'worker') profileLink = 'dashboard.html';
+                if (user.role === 'admin')  profileLink = 'admin.html';
+
+                var bookingLink = user.role === 'worker' ? 'dashboard.html' : 'bookings.html';
+                var adminItem   = user.role === 'admin'
+                    ? '<a href="admin.html" class="nav-dd-item"><i class="fas fa-shield-alt"></i> Admin Panel</a>'
+                    : '';
+
+                item.className = 'nav-user-menu';
+                item.innerHTML =
+                    '<div class="nav-user-btn" id="navUserBtn">' +
+                        '<div class="nav-avatar">' + initials + '</div>' +
+                        '<span class="nav-user-name">' + user.name + '</span>' +
+                        '<i class="fas fa-chevron-down nav-chevron" id="navChevron"></i>' +
+                    '</div>' +
+                    '<div class="nav-dropdown" id="navDropdown">' +
+                        '<div class="nav-dropdown-header">' +
+                            '<div class="nav-dd-avatar">' + initials + '</div>' +
+                            '<div>' +
+                                '<strong>' + user.name + '</strong>' +
+                                '<span>' + (user.email || '') + '</span>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="nav-dropdown-divider"></div>' +
+                        '<a href="' + profileLink + '" class="nav-dd-item"><i class="fas fa-user"></i> My Profile</a>' +
+                        '<a href="' + bookingLink + '" class="nav-dd-item"><i class="fas fa-calendar-check"></i> My Bookings</a>' +
+                        adminItem +
+                        '<div class="nav-dropdown-divider"></div>' +
+                        '<button class="nav-dd-item nav-dd-logout" onclick="(function(){localStorage.removeItem(\'sewa_user\');localStorage.removeItem(\'sewa_user\');localStorage.removeItem(\'sewanow_token\');window.location.href=\'auth.html\';})();">' +
+                            '<i class="fas fa-sign-out-alt"></i> Logout' +
+                        '</button>' +
+                    '</div>';
+
+                var btn      = document.getElementById('navUserBtn');
+                var dropdown = document.getElementById('navDropdown');
+                var chevron  = document.getElementById('navChevron');
+
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    var isOpen = dropdown.classList.contains('open');
+                    dropdown.classList.toggle('open', !isOpen);
+                    chevron.classList.toggle('rotated', !isOpen);
+                });
+
+                document.addEventListener('click', function () {
+                    dropdown.classList.remove('open');
+                    chevron.classList.remove('rotated');
+                });
+
+                dropdown.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                });
+            }
+        })();
+    </script>
+
+    <div class="nav-overlay" id="navOverlay"></div>
+
+    <!-- ===================== PAGE HERO ===================== -->
+    <header class="page-hero">
+        <div class="page-hero-content">
+            <div class="page-hero-tag">&#10022; Verified Professionals</div>
+            <h1>Find the Right <span>Expert</span><br>Near You</h1>
+            <p>Browse, compare &amp; book skilled workers — trusted by 10,000+ customers.</p>
+        </div>
+    </header>
+
+    <!-- ===================== FILTER BAR ===================== -->
+    <section class="filter-bar">
+        <form id="filterForm" class="filter-container">
+            <!-- Location -->
+            <div class="filter-group">
+                <label for="locationFilter"><i class="fas fa-map-marker-alt"></i> &nbsp;Location</label>
+                <input type="text" id="locationFilter" placeholder="e.g. Meerut, Delhi…">
+            </div>
+
+            <!-- Category -->
+            <div class="filter-group">
+                <label for="categoryFilter"><i class="fas fa-tools"></i> &nbsp;Category</label>
+                <select id="categoryFilter">
+                    <option value="all">All Services</option>
+                    <option value="plumber">Plumber</option>
+                    <option value="electrician">Electrician</option>
+                    <option value="carpenter">Carpenter</option>
+                    <option value="painter">Painter</option>
+                    <option value="cleaner">Cleaner</option>
+                    <option value="ac">AC Repair</option>
+                    <option value="interior">Interior</option>
+                    <option value="security">Security</option>
+                </select>
+            </div>
+
+            <!-- Sort -->
+            <div class="filter-group">
+                <label for="sortBy"><i class="fas fa-sort-amount-down"></i> &nbsp;Sort By</label>
+                <select id="sortBy">
+                    <option value="rating">Highest Rated</option>
+                    <option value="experience">Most Experienced</option>
+                    <option value="price_low">Lowest Price</option>
+                    <option value="price_high">Highest Price</option>
+                </select>
+            </div>
+
+            <!-- Availability -->
+            <div class="filter-group" style="flex:0.6; min-width:140px;">
+                <label for="availFilter"><i class="fas fa-circle"></i> &nbsp;Availability</label>
+                <select id="availFilter">
+                    <option value="all">Any</option>
+                    <option value="available">Available Now</option>
+                    <option value="busy">Busy</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-filter">
+                <i class="fas fa-sliders-h"></i> Apply
+            </button>
+        </form>
+
+        <!-- Active filter pills (injected by JS) -->
+        <div class="active-filters" id="activePills"></div>
+    </section>
+
+    <!-- ===================== RESULTS ===================== -->
+    <main class="worker-results">
+
+        <div class="results-header">
+            <h2 id="resultsHeading">
+                Available Workers
+                <span id="resultsCount"></span>
+            </h2>
+            <div class="view-toggle">
+                <button class="view-btn active" id="gridViewBtn" title="Grid View">
+                    <i class="fas fa-th-large"></i>
+                </button>
+                <button class="view-btn" id="listViewBtn" title="List View">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="worker-grid" id="workerGrid">
+            <!-- Cards injected by JS -->
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination"></div>
+    </main>
+
+    <!-- ===================== FOOTER (same as index.html) ===================== -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h3 class="logo-footer">Sewa<span>Now</span></h3>
+                <p>Connecting you with trusted local professionals for all your home service needs.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="worker_list.html">Find Workers</a></li>
+                    <li><a href="auth.html">Login / Register</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="#">Plumber</a></li>
+                    <li><a href="#">Electrician</a></li>
+                    <li><a href="#">Carpenter</a></li>
+                    <li><a href="#">Painter</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Contact</h4>
+                <ul>
+                    <li><i class="fas fa-phone"></i> +91 98765 43210</li>
+                    <li><i class="fas fa-envelope"></i> hello@sewanow.in</li>
+                    <li><i class="fas fa-map-marker-alt"></i> India</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Sewa Now Project | Designed by Your College Team</p>
+        </div>
+    </footer>
+
+    <!-- ===================== SCRIPTS ===================== -->
+
+    <!-- Step 1: Pehle worker.js load ho -->
+    <script src="js/worker.js"></script>
+
+    <!-- Step 2: Firebase real-time listener — onSnapshot -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+      import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyACz2-W4lmpwXUSTOqzd_4vfBoPyl4cvmk",
+        authDomain: "sewa-now.firebaseapp.com",
+        projectId: "sewa-now",
+        storageBucket: "sewa-now.firebasestorage.app",
+        messagingSenderId: "516011205450",
+        appId: "1:516011205450:web:025c0cbdf18ae136b257b3"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      // ✅ onSnapshot — Firebase mein koi bhi change hoga
+      // toh yeh automatically webpage update kar dega
+      // bina page reload kiye
+      onSnapshot(collection(db, "workers"), (snapshot) => {
+        const workers = [];
+
+        snapshot.forEach((doc) => {
+          workers.push({
+            id: doc.id,
+            ...doc.data()
+          });
+        });
+
+        console.log("🔥 Real-time update:", workers.length, "workers");
+
+        window.FIREBASE_WORKERS = workers;
+
+        if (typeof window.initApp === "function") {
+          window.initApp();
+        }
+
+      }, (error) => {
+        console.error("❌ Firebase Error:", error);
+      });
+
+    </script>
+    <script src="js/auth.js"></script>
+
+</body>
+</html>

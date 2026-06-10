@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worker Profile | Sewa Now</title>
+
+    <!-- ✅ SMART REDIRECT:
+         - ?id=... hai  → Worker profile page hai, redirect mat karo
+         - ?id nahi hai → Role ke hisaab se sahi page pe bhejo
+    -->
+   <script>
+        (function () {
+            // 1. If the URL has an ID, we are viewing a worker's public profile.
+            //    Let the page load normally, do NOT redirect.
+            var hasId = new URLSearchParams(window.location.search).get('id');
+            if (hasId) return; 
+
+            // 2. If there is no ID, check who is currently logged in.
+            //    Note: Changed 'sewa_user' to 'sewa_user' to match your auth logic.
+            var user = null;
+            try { user = JSON.parse(localStorage.getItem('sewa_user')); } catch (e) {}
+
+            // 3. If no one is logged in and there's no ID, send them to the login page.
+            if (!user) { window.location.replace('auth.html'); return; }
+
+            // 4. If the user is logged in, redirect them based on their role.
+            var role = (user.role || 'customer').toLowerCase();
+            if (role === 'worker') {
+                window.location.replace('dashboard.html');
+            } else if (role === 'admin') {
+                window.location.replace('admin.html');
+            } else {
+                // The actual profile dashboard for a customer is user-profile.html
+                window.location.replace('user-profile.html');
+            }
+        })();
+    </script>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        body { visibility: hidden; }
+    </style>
+</head>
+<body class="profile-page">
+
+    <!-- ===================== NAVBAR ===================== -->
+    <nav class="navbar">
+        <div class="logo">
+            <h2>Sewa<span>Now</span></h2>
+        </div>
+        <div class="hamburger" id="hamburger">
+            <span></span><span></span><span></span>
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="worker_list.html">Find Workers</a></li>
+            <li id="navAuthItem"><a href="auth.html" class="btn-login">Login / Register</a></li>
+        </ul>
+    </nav>
+
+    <!-- ===================== PROFILE HERO BANNER ===================== -->
+    <div class="profile-hero">
+        <div class="profile-hero-bg"></div>
+        <div class="profile-hero-content">
+            <div class="profile-avatar-wrap">
+                <div class="profile-avatar-ring">
+                    <div class="profile-avatar-circle" id="heroAvatar">?</div>
+                </div>
+                <div class="profile-avatar-badge"><i class="fas fa-hard-hat"></i></div>
+            </div>
+            <div class="profile-hero-info">
+                <h1 id="heroName">Loading...</h1>
+                <p id="heroCategory"><i class="fas fa-tools"></i> —</p>
+                <span class="profile-role-tag" id="heroAvailTag">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== MAIN CONTENT ===================== -->
+    <main class="profile-main">
+
+        <!-- Left Column — Stats + Worker Info -->
+        <aside class="profile-sidebar">
+
+            <!-- Stats Card -->
+            <div class="profile-card" id="statsCard">
+                <h3 class="card-title"><i class="fas fa-chart-bar"></i> Overview</h3>
+                <div class="stat-row">
+                    <div class="stat-box">
+                        <span class="stat-val" id="statExp">—</span>
+                        <span class="stat-lbl">Yrs Exp</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-val" id="statRating">—</span>
+                        <span class="stat-lbl">Rating</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-val" id="statReviews">—</span>
+                        <span class="stat-lbl">Reviews</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Worker Info Card -->
+            <div class="profile-card">
+                <h3 class="card-title"><i class="fas fa-info-circle"></i> Worker Info</h3>
+                <ul class="info-list">
+                    <li>
+                        <i class="fas fa-user"></i>
+                        <div>
+                            <span class="info-label">Full Name</span>
+                            <span class="info-val" id="infoName">—</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-tools"></i>
+                        <div>
+                            <span class="info-label">Category</span>
+                            <span class="info-val" id="infoCategory">—</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <span class="info-label">Location</span>
+                            <span class="info-val" id="infoLocation">—</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-rupee-sign"></i>
+                        <div>
+                            <span class="info-label">Starting Price</span>
+                            <span class="info-val" id="infoPrice">—</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-circle"></i>
+                        <div>
+                            <span class="info-label">Availability</span>
+                            <span class="info-val" id="infoAvail">—</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+        </aside>
+
+        <!-- Right Column — Quick Actions -->
+        <div class="profile-content">
+
+            <div class="profile-card">
+                <h3 class="card-title"><i class="fas fa-bolt"></i> Quick Actions</h3>
+                <div class="worker-actions">
+                    <a href="#" class="btn-book-worker" id="bookNowBtn">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Book Now</span>
+                    </a>
+                    <a href="worker_list.html" class="btn-find-worker">
+                        <i class="fas fa-search"></i>
+                        <span>Find Other Workers</span>
+                    </a>
+                    <a href="worker_list.html" class="btn-back-worker">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Back to Worker List</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Verified Badge Card -->
+            <div class="profile-card">
+                <h3 class="card-title"><i class="fas fa-shield-alt"></i> Verification</h3>
+                <div class="verified-section">
+                    <div class="verified-row">
+                        <div class="verified-icon-wrap">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div>
+                            <span class="info-label">Profile Status</span>
+                            <span class="info-val verified-green">Verified Professional ✓</span>
+                        </div>
+                    </div>
+                    <div class="verified-row">
+                        <div class="verified-icon-wrap">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div>
+                            <span class="info-label">Rating</span>
+                            <span class="info-val" id="verifyRating">—</span>
+                        </div>
+                    </div>
+                    <div class="verified-row">
+                        <div class="verified-icon-wrap">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div>
+                            <span class="info-label">Experience</span>
+                            <span class="info-val" id="verifyExp">—</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ===================== FOOTER ===================== -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h3 class="logo-footer">Sewa<span>Now</span></h3>
+                <p>Connecting you with trusted local professionals for all your home service needs.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="worker_list.html">Find Workers</a></li>
+                    <li><a href="auth.html">Login / Register</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="#">Plumber</a></li>
+                    <li><a href="#">Electrician</a></li>
+                    <li><a href="#">Carpenter</a></li>
+                    <li><a href="#">Painter</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Contact</h4>
+                <ul>
+                    <li><i class="fas fa-phone"></i> +91 98765 43210</li>
+                    <li><i class="fas fa-envelope"></i> hello@sewanow.in</li>
+                    <li><i class="fas fa-map-marker-alt"></i> India</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Sewa Now Project | Designed by Your College Team</p>
+        </div>
+    </footer>
+
+    <!-- Firebase — Worker data fetch + Navbar inject (?id hoga toh) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyACz2-W4lmpwXUSTOqzd_4vfBoPyl4cvmk",
+            authDomain: "sewa-now.firebaseapp.com",
+            projectId: "sewa-now",
+            storageBucket: "sewa-now.firebasestorage.app",
+            messagingSenderId: "516011205450",
+            appId: "1:516011205450:web:025c0cbdf18ae136b257b3"
+        };
+
+        const workerId = new URLSearchParams(window.location.search).get('id');
+
+        // ✅ ?id nahi hai toh Firebase module ka kaam nahi — profile.js handle karega
+        if (!workerId) {
+            document.body.style.visibility = 'visible';
+            // profile.js already redirect kar chuka hoga
+        } else {
+            const app = initializeApp(firebaseConfig);
+            const db  = getFirestore(app);
+
+            try {
+                const snap = await getDoc(doc(db, 'workers', workerId));
+
+                if (snap.exists()) {
+                    const w = { id: snap.id, ...snap.data() };
+
+                    // Initials
+                    const initials = (w.name || '?').trim().split(' ')
+                        .map(p => p[0] || '').join('').toUpperCase().slice(0, 2);
+
+                    // Hero Banner
+                    document.getElementById('heroAvatar').textContent  = initials;
+                    document.getElementById('heroName').textContent     = w.name || '—';
+
+                    var heroCategory = document.getElementById('heroCategory');
+                    if (heroCategory) {
+                        heroCategory.innerHTML = '<i class="fas fa-tools"></i> ' + (w.categoryLabel || w.category || '—');
+                    }
+
+                    var heroAvailTag = document.getElementById('heroAvailTag');
+                    if (heroAvailTag) {
+                        heroAvailTag.textContent = w.available ? '✅ Available Now' : '🔴 Busy';
+                        heroAvailTag.style.background = w.available
+                            ? 'rgba(13,148,136,0.2)' : 'rgba(220,38,38,0.2)';
+                        heroAvailTag.style.borderColor = w.available
+                            ? 'rgba(13,148,136,0.4)' : 'rgba(220,38,38,0.4)';
+                        heroAvailTag.style.color = w.available ? '#0D9488' : '#DC2626';
+                    }
+
+                    // Stats
+                    document.getElementById('statExp').textContent     = w.experience  || '—';
+                    document.getElementById('statRating').textContent  = w.rating      || '—';
+                    document.getElementById('statReviews').textContent = w.reviews     || '—';
+
+                    // Info List
+                    document.getElementById('infoName').textContent     = w.name             || '—';
+                    document.getElementById('infoCategory').textContent = w.categoryLabel    || w.category || '—';
+                    document.getElementById('infoLocation').textContent = w.location         || '—';
+                    document.getElementById('infoPrice').textContent    = w.price ? '₹' + w.price + ' / visit' : '—';
+                    document.getElementById('infoAvail').textContent    = w.available ? '✅ Available Now' : '🔴 Busy';
+
+                    // Verification section
+                    document.getElementById('verifyRating').textContent = w.rating
+                        ? w.rating + ' / 5 (' + (w.reviews || 0) + ' reviews)' : '—';
+                    document.getElementById('verifyExp').textContent    = w.experience
+                        ? w.experience + ' years' : '—';
+
+                    // Book Now button
+                    const bookBtn = document.getElementById('bookNowBtn');
+                    if (bookBtn) bookBtn.href = 'booking.html?id=' + workerId;
+
+                    // Page title
+                    document.title = (w.name || 'Worker') + ' | Sewa Now';
+
+                } else {
+                    document.getElementById('heroName').textContent = 'Worker not found';
+                }
+            } catch (err) {
+                console.error('Firebase error:', err);
+                document.getElementById('heroName').textContent = 'Error loading profile';
+            }
+
+            // ── Navbar user state inject ──
+            var navUser = null;
+            try { navUser = JSON.parse(localStorage.getItem('sewa_user')); } catch(e) {}
+
+            if (navUser && navUser.name) {
+                var item = document.getElementById('navAuthItem');
+                if (item) {
+                    var ini   = navUser.name.trim().split(' ').map(p => p[0] || '').join('').toUpperCase().slice(0,2);
+                    var pLink = navUser.role === 'worker' ? 'dashboard.html' : navUser.role === 'admin' ? 'admin.html' : 'user-profile.html';
+                    var bLink = navUser.role === 'worker' ? 'dashboard.html' : 'bookings.html';
+                    var adminItem = navUser.role === 'admin'
+                        ? '<a href="admin.html" class="nav-dd-item"><i class="fas fa-shield-alt"></i> Admin Panel</a>'
+                        : '';
+
+                    item.className = 'nav-user-menu';
+                    item.innerHTML =
+                        '<div class="nav-user-btn" id="navUserBtn">' +
+                            '<div class="nav-avatar">' + ini + '</div>' +
+                            '<span class="nav-user-name">' + navUser.name + '</span>' +
+                            '<i class="fas fa-chevron-down nav-chevron" id="navChevron"></i>' +
+                        '</div>' +
+                        '<div class="nav-dropdown" id="navDropdown">' +
+                            '<div class="nav-dropdown-header">' +
+                                '<div class="nav-dd-avatar">' + ini + '</div>' +
+                                '<div>' +
+                                    '<strong>' + navUser.name + '</strong>' +
+                                    '<span>' + (navUser.email || '') + '</span>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="nav-dropdown-divider"></div>' +
+                            '<a href="' + pLink + '" class="nav-dd-item"><i class="fas fa-user"></i> My Profile</a>' +
+                            '<a href="' + bLink + '" class="nav-dd-item"><i class="fas fa-calendar-check"></i> My Bookings</a>' +
+                            adminItem +
+                            '<div class="nav-dropdown-divider"></div>' +
+                            '<button class="nav-dd-item nav-dd-logout" onclick="localStorage.removeItem(\'sewa_user\');localStorage.removeItem(\'sewanow_token\');window.location.href=\'auth.html\';">' +
+                                '<i class="fas fa-sign-out-alt"></i> Logout' +
+                            '</button>' +
+                        '</div>';
+
+                    var btn = document.getElementById('navUserBtn');
+                    var dd  = document.getElementById('navDropdown');
+                    var ch  = document.getElementById('navChevron');
+
+                    btn.addEventListener('click', e => {
+                        e.stopPropagation();
+                        var isOpen = dd.classList.contains('open');
+                        dd.classList.toggle('open', !isOpen);
+                        ch.classList.toggle('rotated', !isOpen);
+                    });
+                    document.addEventListener('click', () => {
+                        dd.classList.remove('open');
+                        ch.classList.remove('rotated');
+                    });
+                    dd.addEventListener('click', e => e.stopPropagation());
+                }
+            }
+
+            // ── Hamburger ──
+            var hamburger = document.getElementById('hamburger');
+            var navLinks  = document.getElementById('navLinks');
+            if (hamburger && navLinks) {
+                hamburger.addEventListener('click', function () {
+                    hamburger.classList.toggle('active');
+                    navLinks.classList.toggle('open');
+                });
+            }
+
+            // ── Page visible karo ──
+            document.body.style.visibility = 'visible';
+        }
+    </script>
+
+</body>
+</html>

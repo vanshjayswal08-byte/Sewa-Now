@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sewa Now | Local Services at Your Fingertips</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo">
+            <h2>Sewa<span>Now</span></h2>
+        </div>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="worker_list.html">Find Workers</a></li>
+            <li id="navAuthItem"><a href="auth.html" class="btn-login">Login / Register</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-tag">&#10022; Trusted Home Services</div>
+            <h1>Expert Help, Right at<br><span>Your Doorstep</span></h1>
+            <p>Plumber, Electrician, Carpenter &amp; more — verified local professionals, just a click away.</p>
+            <div class="search-container">
+                <form action="worker_list.html" method="GET">
+                    <input type="text" placeholder="What service do you need? (e.g., Plumber)" name="search" id="serviceSearch">
+                    <button type="submit"><i class="fas fa-search"></i> Search</button>
+                </form>
+            </div>
+            <div class="trust-row">
+                <div class="trust-item"><i class="fas fa-user-check"></i><span>500+ Verified Workers</span></div>
+                <div class="trust-item"><i class="fas fa-bolt"></i><span>Instant Booking</span></div>
+                <div class="trust-item"><i class="fas fa-star"></i><span>4.8&#9733; Avg Rating</span></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Service Categories -->
+    <section class="services">
+        <div class="section-title">
+            <h2>Our Services</h2>
+            <p>Select a category and find the best-rated workers in your area</p>
+        </div>
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="card-icon"><i class="fas fa-faucet"></i></div>
+                <h3>Plumber</h3>
+                <p>Expert solutions for leakages, blockages, and pipe fittings.</p>
+                <a href="worker_list.html?search=Plumber" class="card-link">Book Now <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="service-card">
+                <div class="card-icon"><i class="fas fa-bolt"></i></div>
+                <h3>Electrician</h3>
+                <p>Professional wiring, installations, and appliance repairs.</p>
+                <a href="worker_list.html?search=Electrician" class="card-link">Book Now <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="service-card">
+                <div class="card-icon"><i class="fas fa-hammer"></i></div>
+                <h3>Carpenter</h3>
+                <p>Quality furniture repair, assembly, and custom woodwork.</p>
+                <a href="worker_list.html?search=Carpenter" class="card-link">Book Now <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="service-card">
+                <div class="card-icon"><i class="fas fa-paint-roller"></i></div>
+                <h3>Painter</h3>
+                <p>Give your walls a fresh look with professional painting services.</p>
+                <a href="worker_list.html?search=Painter" class="card-link">Book Now <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="service-card">
+                <div class="card-icon"><i class="fas fa-broom"></i></div>
+                <h3>Cleaner</h3>
+                <p>Deep cleaning services for home, office, and commercial spaces.</p>
+                <a href="worker_list.html?search=Cleaner" class="card-link">Book Now <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="service-card">
+                <div class="card-icon"><i class="fas fa-snowflake"></i></div>
+                <h3>AC Repair</h3>
+                <p>AC installation, servicing, and repair by certified technicians.</p>
+                <a href="worker_list.html?search=AC" class="card-link">Book Now <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="service-card">
+                <div class="card-icon"><i class="fas fa-couch"></i></div>
+                <h3>Interior</h3>
+                <p>Home interior design and decoration at affordable rates.</p>
+                <a href="worker_list.html?search=Interior" class="card-link">Book Now <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="service-card">
+                <div class="card-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>Security</h3>
+                <p>CCTV installation, locks, and home security system setup.</p>
+                <a href="worker_list.html?search=Security" class="card-link">Book Now <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="section-title">
+            <h2>How It Works</h2>
+            <p>Book a professional in under 2 minutes</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-num">01</div>
+                <i class="fas fa-search step-icon"></i>
+                <h4>Search a Service</h4>
+                <p>Type what you need and browse verified local workers instantly.</p>
+            </div>
+            <div class="step-connector"><i class="fas fa-chevron-right"></i></div>
+            <div class="step-card">
+                <div class="step-num">02</div>
+                <i class="fas fa-user-check step-icon"></i>
+                <h4>Pick a Worker</h4>
+                <p>View profiles, ratings, and pricing — choose with confidence.</p>
+            </div>
+            <div class="step-connector"><i class="fas fa-chevron-right"></i></div>
+            <div class="step-card">
+                <div class="step-num">03</div>
+                <i class="fas fa-handshake step-icon"></i>
+                <h4>Get It Done</h4>
+                <p>Book and relax — let the expert handle the rest at your doorstep.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-item"><h3 class="stat-num" data-target="500">0</h3><p>Verified Workers</p></div>
+            <div class="stat-item"><h3 class="stat-num" data-target="10000">0</h3><p>Happy Customers</p></div>
+            <div class="stat-item"><h3 class="stat-num" data-target="8">0</h3><p>Service Categories</p></div>
+            <div class="stat-item"><h3 class="stat-num" data-target="4">0</h3><p>Cities Covered</p></div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="section-title">
+            <h2>What Our Customers Say</h2>
+            <p>Real experiences from real people</p>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                <p>"The plumber arrived within an hour. Excellent work and very reasonable charges!"</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">RK</div>
+                    <div><strong>Rahul Kumar</strong><span>Meerut, UP</span></div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                <p>"Booked an electrician for my new flat. Super professional and completed work on time."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">PS</div>
+                    <div><strong>Priya Sharma</strong><span>Delhi, NCR</span></div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+                <p>"Carpenter did an amazing job with my wardrobe. Will definitely use Sewa Now again!"</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">AM</div>
+                    <div><strong>Aman Mishra</strong><span>Noida, UP</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2>Ready to Get Started?</h2>
+            <p>Join thousands of happy customers across your city</p>
+            <div class="cta-buttons">
+                <a href="worker_list.html" class="btn-primary">Find Workers</a>
+                <a href="auth.html" class="btn-secondary">Register as Worker</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h3 class="logo-footer">Sewa<span>Now</span></h3>
+                <p>Connecting you with trusted local professionals for all your home service needs.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="worker_list.html">Find Workers</a></li>
+                    <li><a href="auth.html">Login / Register</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="#">Plumber</a></li>
+                    <li><a href="#">Electrician</a></li>
+                    <li><a href="#">Carpenter</a></li>
+                    <li><a href="#">Painter</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Contact</h4>
+                <ul>
+                    <li><i class="fas fa-phone"></i> +91 98765 43210</li>
+                    <li><i class="fas fa-envelope"></i> hello@sewanow.in</li>
+                    <li><i class="fas fa-map-marker-alt"></i> India</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Sewa Now Project | Designed by Your College Team</p>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <!-- auth.js: shared navbar + session helpers — MUST be last -->
+    <script src="js/auth.js"></script>
+
+</body>
+</html>

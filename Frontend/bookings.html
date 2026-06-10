@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings | Sewa Now</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/bookings.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="bookings-page">
+
+    <!-- ===================== NAVBAR ===================== -->
+    <nav class="navbar">
+        <div class="logo">
+            <h2>Sewa<span>Now</span></h2>
+        </div>
+        <div class="hamburger" id="hamburger">
+            <span></span><span></span><span></span>
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="worker_list.html">Find Workers</a></li>
+            <li id="navAuthItem"><a href="auth.html" class="btn-login">Login / Register</a></li>
+        </ul>
+    </nav>
+
+    <!-- Navbar user dropdown -->
+    <script>
+        (function () {
+            var user = null;
+            try { user = JSON.parse(localStorage.getItem('sewa_user')); } catch (e) {} // ✅ FIXED
+            if (!user) { window.location.href = 'auth.html'; return; }
+
+            var item = document.getElementById('navAuthItem');
+            if (!item) return;
+
+            var initials = user.name
+                ? user.name.split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0,2)
+                : '?';
+
+            var profileLink = user.role === 'worker' ? 'dashboard.html' : 'profile.html';
+            var bookingLink = user.role === 'worker' ? 'dashboard.html' : 'bookings.html';
+            var adminItem   = user.role === 'admin'
+                ? '<a href="admin.html" class="nav-dd-item"><i class="fas fa-shield-alt"></i> Admin Panel</a>' : '';
+
+            item.className = 'nav-user-menu';
+            item.innerHTML =
+                '<div class="nav-user-btn" id="navUserBtn">' +
+                    '<div class="nav-avatar">' + initials + '</div>' +
+                    '<span class="nav-user-name">' + user.name + '</span>' +
+                    '<i class="fas fa-chevron-down nav-chevron" id="navChevron"></i>' +
+                '</div>' +
+                '<div class="nav-dropdown" id="navDropdown">' +
+                    '<div class="nav-dropdown-header">' +
+                        '<div class="nav-dd-avatar">' + initials + '</div>' +
+                        '<div><strong>' + user.name + '</strong><span>' + (user.email || '') + '</span></div>' +
+                    '</div>' +
+                    '<div class="nav-dropdown-divider"></div>' +
+                    '<a href="' + profileLink + '" class="nav-dd-item"><i class="fas fa-user"></i> My Profile</a>' +
+                    '<a href="' + bookingLink + '" class="nav-dd-item"><i class="fas fa-calendar-check"></i> My Bookings</a>' +
+                    adminItem +
+                    '<div class="nav-dropdown-divider"></div>' +
+                    '<button class="nav-dd-item nav-dd-logout" onclick="(function(){localStorage.removeItem(\'sewa_user\');localStorage.removeItem(\'sewanow_token\');window.location.href=\'auth.html\';})();">' +
+                        '<i class="fas fa-sign-out-alt"></i> Logout' +
+                    '</button>' +
+                '</div>';
+
+            var btn = document.getElementById('navUserBtn');
+            var dd  = document.getElementById('navDropdown');
+            var ch  = document.getElementById('navChevron');
+            btn.addEventListener('click', function(e){
+                e.stopPropagation();
+                var open = dd.classList.contains('open');
+                dd.classList.toggle('open', !open);
+                ch.classList.toggle('rotated', !open);
+            });
+            document.addEventListener('click', function(){
+                dd.classList.remove('open');
+                ch.classList.remove('rotated');
+            });
+            dd.addEventListener('click', function(e){ e.stopPropagation(); });
+        })();
+    </script>
+
+    <!-- ===================== PAGE HERO ===================== -->
+    <div class="bookings-hero">
+        <div class="bookings-hero-bg"></div>
+        <div class="bookings-hero-content">
+            <div class="bookings-hero-text">
+                <h1><i class="fas fa-calendar-check"></i> My Bookings</h1>
+                <p id="heroGreeting">All your service bookings in one place</p>
+            </div>
+            <div class="bookings-summary-pills" id="summaryPills">
+                <div class="summary-pill">
+                    <span class="pill-val" id="pillTotal">—</span>
+                    <span class="pill-lbl">Total</span>
+                </div>
+                <div class="summary-pill pill-green">
+                    <span class="pill-val" id="pillCompleted">—</span>
+                    <span class="pill-lbl">Completed</span>
+                </div>
+                <div class="summary-pill pill-orange">
+                    <span class="pill-val" id="pillPending">—</span>
+                    <span class="pill-lbl">Pending</span>
+                </div>
+                <div class="summary-pill pill-red">
+                    <span class="pill-val" id="pillCancelled">—</span>
+                    <span class="pill-lbl">Cancelled</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== FILTER + BOOKINGS ===================== -->
+    <main class="bookings-main">
+
+        <!-- Filter Bar -->
+        <div class="bookings-filter-bar">
+            <div class="filter-left">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="pending">Pending</button>
+                <button class="filter-btn" data-filter="confirmed">Confirmed</button>
+                <button class="filter-btn" data-filter="completed">Completed</button>
+                <button class="filter-btn" data-filter="cancelled">Cancelled</button>
+            </div>
+            <div class="filter-right">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="bookingSearch" placeholder="Search by service or worker...">
+                </div>
+                <select id="sortSelect" class="sort-select">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Bookings List -->
+        <div id="bookingsContainer">
+            <div class="bookings-loading">
+                <div class="b-spinner"></div>
+                <span>Loading your bookings...</span>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ===================== FOOTER ===================== -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h3 class="logo-footer">Sewa<span>Now</span></h3>
+                <p>Connecting you with trusted local professionals for all your home service needs.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="worker_list.html">Find Workers</a></li>
+                    <li><a href="auth.html">Login / Register</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="#">Plumber</a></li>
+                    <li><a href="#">Electrician</a></li>
+                    <li><a href="#">Carpenter</a></li>
+                    <li><a href="#">Painter</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Contact</h4>
+                <ul>
+                    <li><i class="fas fa-phone"></i> +91 98765 43210</li>
+                    <li><i class="fas fa-envelope"></i> hello@sewanow.in</li>
+                    <li><i class="fas fa-map-marker-alt"></i> India</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Sewa Now Project | Designed by Your College Team</p>
+        </div>
+    </footer>
+
+    <script src="js/bookings.js"></script>
+
+</body>
+</html>

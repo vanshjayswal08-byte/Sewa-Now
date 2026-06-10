@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worker Dashboard | Sewa Now</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ── Dashboard Variables ── */
+        :root {
+            --saffron   : #F97316;
+            --saffron-dk: #ea6c0a;
+            --cream     : #FFF7ED;
+            --dark      : #1C1917;
+            --gray      : #78716C;
+            --light     : #F5F5F4;
+            --white     : #ffffff;
+            --green     : #10B981;
+            --red       : #EF4444;
+            --blue      : #3B82F6;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'DM Sans', sans-serif; background: #F5F5F4; color: var(--dark); }
+
+        /* ── Navbar ── */
+        .navbar {
+            background: var(--white);
+            padding: 0 5%;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar .logo h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--dark); }
+        .navbar .logo h2 span { color: var(--saffron); }
+        .nav-user {
+            display: flex; align-items: center; gap: 12px;
+        }
+        .nav-user span { font-weight: 600; color: var(--saffron); font-size: 0.95rem; }
+        .nav-user a {
+            font-size: 0.82rem; color: var(--gray);
+            text-decoration: underline; cursor: pointer;
+        }
+
+        /* ── Dashboard Layout ── */
+        .dash-wrapper {
+            max-width: 1200px;
+            margin: 32px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 24px;
+        }
+
+        /* ── Sidebar ── */
+        .dash-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .dash-profile-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+            border: 1.5px solid rgba(249,115,22,0.10);
+        }
+        .dash-avatar {
+            width: 72px; height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--saffron), var(--saffron-dk));
+            color: white;
+            font-size: 1.6rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 12px;
+        }
+        .dash-profile-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }
+        .dash-profile-card p  { font-size: 0.83rem; color: var(--gray); margin-bottom: 6px; }
+        .dash-badge {
+            display: inline-block;
+            background: var(--cream);
+            color: var(--saffron);
+            font-size: 0.75rem; font-weight: 600;
+            padding: 3px 10px; border-radius: 20px;
+            margin-bottom: 4px;
+        }
+        .dash-rating-mini {
+            font-size: 0.82rem; color: var(--saffron); font-weight: 600;
+        }
+
+        .dash-nav {
+            background: var(--white);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+            border: 1.5px solid rgba(249,115,22,0.10);
+        }
+        .dash-nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 13px 20px;
+            cursor: pointer;
+            font-size: 0.92rem; color: var(--dark);
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            transition: background 0.15s;
+            text-decoration: none;
+        }
+        .dash-nav-item:last-child { border-bottom: none; }
+        .dash-nav-item i { width: 18px; color: var(--gray); font-size: 0.88rem; }
+        .dash-nav-item:hover, .dash-nav-item.active {
+            background: var(--cream); color: var(--saffron);
+        }
+        .dash-nav-item:hover i, .dash-nav-item.active i { color: var(--saffron); }
+
+        /* ── Main Content ── */
+        .dash-main { display: flex; flex-direction: column; gap: 20px; }
+
+        /* ── Stats Row ── */
+        .dash-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        .stat-card {
+            background: var(--white);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+            border: 1.5px solid rgba(249,115,22,0.08);
+            display: flex; align-items: center; gap: 14px;
+        }
+        .stat-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0;
+        }
+        .stat-icon.orange { background: rgba(249,115,22,0.12); color: var(--saffron); }
+        .stat-icon.green  { background: rgba(16,185,129,0.12); color: var(--green); }
+        .stat-icon.blue   { background: rgba(59,130,246,0.12); color: var(--blue); }
+        .stat-icon.red    { background: rgba(239,68,68,0.12);  color: var(--red); }
+        .stat-info h4 { font-size: 1.35rem; font-weight: 700; line-height: 1; }
+        .stat-info p  { font-size: 0.78rem; color: var(--gray); margin-top: 3px; }
+
+        /* ── Section Card ── */
+        .dash-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+            border: 1.5px solid rgba(249,115,22,0.08);
+        }
+        .dash-card-title {
+            font-size: 1rem; font-weight: 700;
+            margin-bottom: 18px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .dash-card-title i { color: var(--saffron); }
+
+        /* ── Bookings Table ── */
+        .booking-table { width: 100%; border-collapse: collapse; }
+        .booking-table th {
+            text-align: left; font-size: 0.78rem;
+            color: var(--gray); font-weight: 600;
+            padding: 8px 12px;
+            border-bottom: 2px solid var(--light);
+            text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .booking-table td {
+            padding: 12px; font-size: 0.88rem;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+        }
+        .booking-table tr:last-child td { border-bottom: none; }
+        .booking-table tr:hover td { background: var(--cream); }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 600;
+        }
+        .status-pending   { background: #FEF3C7; color: #D97706; }
+        .status-confirmed { background: #D1FAE5; color: #059669; }
+        .status-completed { background: #DBEAFE; color: #2563EB; }
+        .status-cancelled { background: #FEE2E2; color: #DC2626; }
+
+        .action-btn {
+            padding: 5px 12px; border: none; border-radius: 6px;
+            font-size: 0.78rem; font-weight: 600; cursor: pointer;
+            margin-right: 4px; transition: opacity 0.15s;
+        }
+        .action-btn:hover { opacity: 0.85; }
+        .btn-accept { background: var(--green);  color: white; }
+        .btn-reject { background: var(--red);    color: white; }
+
+        /* ── Profile Edit Form ── */
+        .edit-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .edit-field { display: flex; flex-direction: column; gap: 6px; }
+        .edit-field.full { grid-column: 1 / -1; }
+        .edit-field label { font-size: 0.82rem; font-weight: 600; color: var(--gray); }
+        .edit-field input,
+        .edit-field select,
+        .edit-field textarea {
+            border: 1.5px solid #E7E5E4;
+            border-radius: 8px; padding: 9px 12px;
+            font-family: inherit; font-size: 0.9rem;
+            color: var(--dark); background: var(--white);
+            outline: none; transition: border 0.15s;
+        }
+        .edit-field input:focus,
+        .edit-field select:focus,
+        .edit-field textarea:focus { border-color: var(--saffron); }
+        .edit-field textarea { resize: vertical; min-height: 80px; }
+
+        .save-btn {
+            margin-top: 18px;
+            padding: 10px 28px; border: none; border-radius: 8px;
+            background: var(--saffron); color: white;
+            font-size: 0.92rem; font-weight: 600; cursor: pointer;
+            transition: background 0.15s;
+        }
+        .save-btn:hover { background: var(--saffron-dk); }
+
+        /* ── Availability Toggle ── */
+        .avail-toggle {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 20px;
+        }
+        .avail-toggle span { font-size: 0.9rem; font-weight: 600; }
+        .toggle-switch {
+            position: relative; width: 48px; height: 26px;
+        }
+        .toggle-switch input { display: none; }
+        .toggle-slider-sw {
+            position: absolute; inset: 0;
+            background: #D1D5DB; border-radius: 999px;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .toggle-slider-sw::before {
+            content: '';
+            position: absolute; top: 3px; left: 3px;
+            width: 20px; height: 20px;
+            background: white; border-radius: 50%;
+            transition: transform 0.2s;
+        }
+        .toggle-switch input:checked + .toggle-slider-sw { background: var(--green); }
+        .toggle-switch input:checked + .toggle-slider-sw::before { transform: translateX(22px); }
+
+        /* ── Empty State ── */
+        .empty-state {
+            text-align: center; padding: 32px 0;
+            color: var(--gray); font-size: 0.9rem;
+        }
+        .empty-state i { font-size: 2rem; color: #D1D5DB; margin-bottom: 8px; display: block; }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .dash-wrapper { grid-template-columns: 1fr; }
+            .dash-stats   { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 560px) {
+            .dash-stats { grid-template-columns: 1fr; }
+            .edit-grid  { grid-template-columns: 1fr; }
+        }
+
+        /* ── Tab Sections ── */
+        .dash-section { display: none; }
+        .dash-section.active { display: block; }
+    </style>
+</head>
+<body>
+
+    <!-- ── NAVBAR ── -->
+    <nav class="navbar">
+        <div class="logo"><h2>Sewa<span>Now</span></h2></div>
+        <div class="nav-user">
+            <span id="navWorkerName">👤 Worker</span>
+            <a onclick="logout()">Logout</a>
+        </div>
+    </nav>
+
+    <!-- ── DASHBOARD ── -->
+    <div class="dash-wrapper">
+
+        <!-- ── SIDEBAR ── -->
+        <aside class="dash-sidebar">
+
+            <!-- Profile Mini Card -->
+            <div class="dash-profile-card">
+                <div class="dash-avatar" id="sideAvatar">?</div>
+                <h3 id="sideName">Worker Name</h3>
+                <p id="sideCategory"><i class="fas fa-tools"></i> Category</p>
+                <div class="dash-badge" id="sideBadge">● Available</div>
+                <div class="dash-rating-mini" id="sideRating">★ 5.0</div>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="dash-nav">
+                <a class="dash-nav-item active" onclick="showSection('overview', this)">
+                    <i class="fas fa-th-large"></i> Overview
+                </a>
+                <a class="dash-nav-item" onclick="showSection('bookings', this)">
+                    <i class="fas fa-calendar-alt"></i> My Bookings
+                </a>
+                <a class="dash-nav-item" onclick="showSection('profile', this)">
+                    <i class="fas fa-user-edit"></i> Edit Profile
+                </a>
+                <a class="dash-nav-item" href="index.html">
+                    <i class="fas fa-home"></i> Go to Home
+                </a>
+            </nav>
+
+        </aside>
+
+        <!-- ── MAIN ── -->
+        <main class="dash-main">
+
+            <!-- ══ SECTION: OVERVIEW ══ -->
+            <div class="dash-section active" id="sec-overview">
+
+                <!-- Stats -->
+                <div class="dash-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon orange"><i class="fas fa-calendar-check"></i></div>
+                        <div class="stat-info">
+                            <h4 id="statTotal">0</h4>
+                            <p>Total Bookings</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-info">
+                            <h4 id="statCompleted">0</h4>
+                            <p>Completed Jobs</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fas fa-star"></i></div>
+                        <div class="stat-info">
+                            <h4 id="statRating">5.0</h4>
+                            <p>Avg Rating</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red"><i class="fas fa-clock"></i></div>
+                        <div class="stat-info">
+                            <h4 id="statPending">0</h4>
+                            <p>Pending</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Bookings -->
+                <div class="dash-card">
+                    <div class="dash-card-title">
+                        <i class="fas fa-history"></i> Recent Bookings
+                    </div>
+                    <div id="recentBookings">
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times"></i>
+                            Loading bookings...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ══ SECTION: BOOKINGS ══ -->
+            <div class="dash-section" id="sec-bookings">
+                <div class="dash-card">
+                    <div class="dash-card-title">
+                        <i class="fas fa-calendar-alt"></i> All Bookings
+                    </div>
+
+                    <!-- Availability Toggle -->
+                    <div class="avail-toggle">
+                        <span>Availability:</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="availToggle" onchange="toggleAvailability(this)">
+                            <span class="toggle-slider-sw"></span>
+                        </label>
+                        <span id="availLabel" style="color:#78716C;">Busy</span>
+                    </div>
+
+                    <div id="allBookings">
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times"></i>
+                            Loading bookings...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ SECTION: EDIT PROFILE ══ -->
+            <div class="dash-section" id="sec-profile">
+                <div class="dash-card">
+                    <div class="dash-card-title">
+                        <i class="fas fa-user-edit"></i> Edit My Profile
+                    </div>
+                    <div class="edit-grid">
+                        <div class="edit-field">
+                            <label>Full Name</label>
+                            <input type="text" id="editName" placeholder="Your full name">
+                        </div>
+                        <div class="edit-field">
+                            <label>Phone</label>
+                            <input type="tel" id="editPhone" placeholder="+91 98765 43210">
+                        </div>
+                        <div class="edit-field">
+                            <label>City</label>
+                            <input type="text" id="editCity" placeholder="e.g. Meerut">
+                        </div>
+                        <div class="edit-field">
+                            <label>Experience (years)</label>
+                            <input type="number" id="editExp" min="0" max="50" placeholder="e.g. 3">
+                        </div>
+                        <div class="edit-field">
+                            <label>Category</label>
+                            <select id="editCategory">
+                                <option value="plumber">Plumber</option>
+                                <option value="electrician">Electrician</option>
+                                <option value="carpenter">Carpenter</option>
+                                <option value="painter">Painter</option>
+                                <option value="cleaner">Cleaner</option>
+                                <option value="ac repair">AC Repair</option>
+                                <option value="interior">Interior</option>
+                                <option value="security">Security</option>
+                            </select>
+                        </div>
+                        <div class="edit-field full">
+                            <label>Bio</label>
+                            <textarea id="editBio" placeholder="Tell customers about yourself..."></textarea>
+                        </div>
+                    </div>
+                    <button class="save-btn" onclick="saveProfile()">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <p id="saveMsg" style="margin-top:10px;font-size:0.85rem;color:#10B981;display:none;">
+                        ✅ Profile updated successfully!
+                    </p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ── FOOTER ── -->
+    <footer style="text-align:center;padding:20px;font-size:0.82rem;color:#A8A29E;margin-top:20px;">
+        &copy; 2026 Sewa Now Project | Designed by Your College Team
+    </footer>
+
+    <script>
+        var API_URL = 'http://127.0.0.1:5000';
+        var currentUser = null;
+
+        /* ── Load User from localStorage ── */
+        (function () {
+            try { currentUser = JSON.parse(localStorage.getItem('sewa_user')); } catch (e) {} // ✅ FIXED
+
+            if (!currentUser || currentUser.role !== 'worker') {
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            // Fill navbar & sidebar
+            document.getElementById('navWorkerName').textContent = '👤 ' + currentUser.name;
+            document.getElementById('sideName').textContent      = currentUser.name;
+            document.getElementById('sideAvatar').textContent    = currentUser.name.slice(0,2).toUpperCase();
+            document.getElementById('sideCategory').innerHTML    = '<i class="fas fa-tools"></i> ' + (currentUser.category || 'Worker');
+            document.getElementById('sideRating').textContent    = '★ ' + (currentUser.rating || '5.0');
+
+            // Fill edit form
+            document.getElementById('editName').value     = currentUser.name       || '';
+            document.getElementById('editPhone').value    = currentUser.phone      || '';
+            document.getElementById('editCity').value     = currentUser.city       || '';
+            document.getElementById('editExp').value      = currentUser.experience || '';
+            document.getElementById('editBio').value      = currentUser.bio        || '';
+            if (currentUser.category) {
+                document.getElementById('editCategory').value = currentUser.category;
+            }
+
+            // Load bookings
+            loadBookings();
+        })();
+
+        /* ── Section Switcher ── */
+        function showSection(name, el) {
+            document.querySelectorAll('.dash-section').forEach(function(s) { s.classList.remove('active'); });
+            document.querySelectorAll('.dash-nav-item').forEach(function(n) { n.classList.remove('active'); });
+            document.getElementById('sec-' + name).classList.add('active');
+            if (el) el.classList.add('active');
+        }
+
+        /* ── Load Bookings from Backend ── */
+        function loadBookings() {
+            fetch(API_URL + '/bookings/worker/' + currentUser.email)
+                .then(function(r) { return r.json(); })
+                .then(function(res) {
+                    if (!res.success) return;
+                    var bookings = res.data;
+
+                    var completed = bookings.filter(function(b) { return b.status === 'completed'; }).length;
+                    var pending   = bookings.filter(function(b) { return b.status === 'pending'; }).length;
+                    document.getElementById('statTotal').textContent     = bookings.length;
+                    document.getElementById('statCompleted').textContent = completed;
+                    document.getElementById('statPending').textContent   = pending;
+                    document.getElementById('statRating').textContent    = currentUser.rating || '5.0';
+
+                    renderBookingTable('recentBookings', bookings.slice(0, 5), false);
+                    renderBookingTable('allBookings',    bookings,              true);
+                })
+                .catch(function() {
+                    document.getElementById('recentBookings').innerHTML =
+                        '<div class="empty-state"><i class="fas fa-wifi"></i> Backend se connect nahi ho pa raha.</div>';
+                });
+        }
+
+        function renderBookingTable(containerId, bookings, showActions) {
+            var el = document.getElementById(containerId);
+            if (!bookings || bookings.length === 0) {
+                el.innerHTML = '<div class="empty-state"><i class="fas fa-calendar-times"></i> No bookings yet.</div>';
+                return;
+            }
+
+            var html = '<table class="booking-table"><thead><tr>' +
+                '<th>Booking ID</th><th>Customer</th><th>Service</th><th>Date</th><th>Status</th>' +
+                (showActions ? '<th>Action</th>' : '') +
+                '</tr></thead><tbody>';
+
+            bookings.forEach(function (b) {
+                var statusClass = 'status-' + (b.status || 'pending');
+                html += '<tr>' +
+                    '<td><strong>#' + b.booking_id + '</strong></td>' +
+                    '<td>' + b.customer_email + '</td>' +
+                    '<td>' + b.service_type + '</td>' +
+                    '<td>' + b.date + '</td>' +
+                    '<td><span class="status-badge ' + statusClass + '">' + (b.status || 'pending') + '</span></td>';
+
+                if (showActions && b.status === 'pending') {
+                    html += '<td>' +
+                        '<button class="action-btn btn-accept" onclick="updateStatus(\'' + b.booking_id + '\', \'confirmed\')">Accept</button>' +
+                        '<button class="action-btn btn-reject" onclick="updateStatus(\'' + b.booking_id + '\', \'cancelled\')">Reject</button>' +
+                        '</td>';
+                } else if (showActions && b.status === 'confirmed') {
+                    html += '<td>' +
+                        '<button class="action-btn btn-accept" onclick="updateStatus(\'' + b.booking_id + '\', \'completed\')">Mark Done</button>' +
+                        '</td>';
+                } else if (showActions) {
+                    html += '<td>—</td>';
+                }
+
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            el.innerHTML = html;
+        }
+
+        /* ── Update Booking Status ── */
+        function updateStatus(bookingId, status) {
+            fetch(API_URL + '/booking/' + bookingId + '/status', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: status })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                if (res.success) {
+                    alert('✅ Booking ' + status + '!');
+                    loadBookings();
+                } else {
+                    alert('❌ ' + res.error);
+                }
+            });
+        }
+
+        /* ── Save Profile ── */
+        function saveProfile() {
+            var data = {
+                name:       document.getElementById('editName').value.trim(),
+                phone:      document.getElementById('editPhone').value.trim(),
+                city:       document.getElementById('editCity').value.trim(),
+                experience: document.getElementById('editExp').value,
+                category:   document.getElementById('editCategory').value,
+                bio:        document.getElementById('editBio').value.trim(),
+            };
+
+            fetch(API_URL + '/user/' + currentUser.email, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                if (res.success) {
+                    currentUser = Object.assign(currentUser, data);
+                    localStorage.setItem('sewa_user', JSON.stringify(currentUser)); // ✅ FIXED
+                    document.getElementById('saveMsg').style.display = 'block';
+                    document.getElementById('sideName').textContent = currentUser.name;
+                    document.getElementById('navWorkerName').textContent = '👤 ' + currentUser.name;
+                    setTimeout(function() { document.getElementById('saveMsg').style.display = 'none'; }, 3000);
+                } else {
+                    alert('❌ ' + res.error);
+                }
+            })
+            .catch(function() { alert('❌ Backend se connect nahi ho pa raha.'); });
+        }
+
+        /* ── Availability Toggle ── */
+        function toggleAvailability(checkbox) {
+            var label = document.getElementById('availLabel');
+            label.textContent = checkbox.checked ? 'Available' : 'Busy';
+            label.style.color = checkbox.checked ? '#10B981' : '#78716C';
+            var badge = document.getElementById('sideBadge');
+            badge.textContent = checkbox.checked ? '● Available' : '● Busy';
+            badge.style.color = checkbox.checked ? '#10B981' : '#78716C';
+        }
+
+        /* ── Logout ── */
+        function logout() {
+            localStorage.removeItem('sewa_user'); // ✅ FIXED
+            window.location.href = 'auth.html';
+        }
+    </script>
+    <script src="js/auth.js"></script>
+
+</body>
+</html>

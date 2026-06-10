@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | Sewa Now</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/user-profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="profile-page">
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo">
+            <h2>Sewa<span>Now</span></h2>
+        </div>
+        <div class="hamburger" id="hamburger">
+            <span></span><span></span><span></span>
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="worker_list.html">Find Workers</a></li>
+            <li id="navAuthItem"><a href="auth.html" class="btn-login">Login / Register</a></li>
+        </ul>
+    </nav>
+
+    <!-- Navbar user dropdown inject -->
+    <script>
+        (function () {
+            var user = null;
+            // ✅ FIX 1: 'sewa_user' → 'sewa_user'
+            try { user = JSON.parse(localStorage.getItem('sewa_user')); } catch (e) {}
+            if (!user) { window.location.href = 'auth.html'; return; }
+
+            var item = document.getElementById('navAuthItem');
+            if (!item) return;
+
+            var initials = user.name
+                ? user.name.split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0,2)
+                : '?';
+
+            var profileLink = user.role === 'worker' ? 'dashboard.html' : 'user-profile.html';
+            var bookingLink = user.role === 'worker' ? 'dashboard.html' : 'bookings.html';
+            var adminItem   = user.role === 'admin'
+                ? '<a href="admin.html" class="nav-dd-item"><i class="fas fa-shield-alt"></i> Admin Panel</a>' : '';
+
+            item.className = 'nav-user-menu';
+            item.innerHTML =
+                '<div class="nav-user-btn" id="navUserBtn">' +
+                    '<div class="nav-avatar">' + initials + '</div>' +
+                    '<span class="nav-user-name">' + user.name + '</span>' +
+                    '<i class="fas fa-chevron-down nav-chevron" id="navChevron"></i>' +
+                '</div>' +
+                '<div class="nav-dropdown" id="navDropdown">' +
+                    '<div class="nav-dropdown-header">' +
+                        '<div class="nav-dd-avatar">' + initials + '</div>' +
+                        '<div><strong>' + user.name + '</strong><span>' + (user.email || '') + '</span></div>' +
+                    '</div>' +
+                    '<div class="nav-dropdown-divider"></div>' +
+                    '<a href="' + profileLink + '" class="nav-dd-item"><i class="fas fa-user"></i> My Profile</a>' +
+                    '<a href="' + bookingLink + '" class="nav-dd-item"><i class="fas fa-calendar-check"></i> My Bookings</a>' +
+                    adminItem +
+                    '<div class="nav-dropdown-divider"></div>' +
+                    '<button class="nav-dd-item nav-dd-logout" onclick="(function(){localStorage.removeItem(\'sewa_user\');localStorage.removeItem(\'sewa_user\');localStorage.removeItem(\'sewanow_token\');window.location.href=\'auth.html\';})();">' +
+                        '<i class="fas fa-sign-out-alt"></i> Logout' +
+                    '</button>' +
+                '</div>';
+
+            var btn = document.getElementById('navUserBtn');
+            var dd  = document.getElementById('navDropdown');
+            var ch  = document.getElementById('navChevron');
+            btn.addEventListener('click', function(e){
+                e.stopPropagation();
+                var open = dd.classList.contains('open');
+                dd.classList.toggle('open', !open);
+                ch.classList.toggle('rotated', !open);
+            });
+            document.addEventListener('click', function(){
+                dd.classList.remove('open');
+                ch.classList.remove('rotated');
+            });
+            dd.addEventListener('click', function(e){ e.stopPropagation(); });
+        })();
+    </script>
+
+    <!-- Profile Hero Banner -->
+    <div class="profile-hero">
+        <div class="profile-hero-bg"></div>
+        <div class="profile-hero-content">
+            <div class="profile-avatar-wrap">
+                <div class="profile-avatar-ring">
+                    <div class="profile-avatar-circle" id="heroAvatar">?</div>
+                </div>
+                <div class="profile-avatar-badge"><i class="fas fa-check"></i></div>
+            </div>
+            <div class="profile-hero-info">
+                <h1 id="heroName">Loading...</h1>
+                <p id="heroEmail"><i class="fas fa-envelope"></i> —</p>
+                <span class="profile-role-tag" id="heroRole">Customer</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="profile-main">
+
+        <!-- Left Column — Stats + Quick Info -->
+        <aside class="profile-sidebar">
+
+            <div class="profile-card" id="statsCard">
+                <h3 class="card-title"><i class="fas fa-chart-bar"></i> Overview</h3>
+                <div class="stat-row">
+                    <div class="stat-box">
+                        <span class="stat-val" id="statBookings">—</span>
+                        <span class="stat-lbl">Bookings</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-val" id="statCompleted">—</span>
+                        <span class="stat-lbl">Completed</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-val" id="statPending">—</span>
+                        <span class="stat-lbl">Pending</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-card">
+                <h3 class="card-title"><i class="fas fa-info-circle"></i> Account Info</h3>
+                <ul class="info-list">
+                    <li>
+                        <i class="fas fa-user"></i>
+                        <div>
+                            <span class="info-label">Full Name</span>
+                            <span class="info-val" id="infoName">—</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <span class="info-label">Email</span>
+                            <span class="info-val" id="infoEmail">—</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <span class="info-label">Phone</span>
+                            <span class="info-val" id="infoPhone">—</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-shield-alt"></i>
+                        <div>
+                            <span class="info-label">Role</span>
+                            <span class="info-val" id="infoRole">—</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-calendar-alt"></i>
+                        <div>
+                            <span class="info-label">Member Since</span>
+                            <span class="info-val" id="infoJoined">—</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+        </aside>
+
+        <!-- Right Column — Edit Form + Bookings -->
+        <div class="profile-content">
+
+            <!-- Edit Profile Card -->
+            <div class="profile-card">
+                <h3 class="card-title"><i class="fas fa-edit"></i> Edit Profile</h3>
+                <form id="editProfileForm" class="edit-form" novalidate>
+
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label for="editName">Full Name</label>
+                            <div class="input-wrap">
+                                <i class="fas fa-user"></i>
+                                <input type="text" id="editName" placeholder="Your full name">
+                            </div>
+                            <span class="err-msg" id="editNameErr"></span>
+                        </div>
+                        <div class="input-group">
+                            <label for="editPhone">Phone Number</label>
+                            <div class="input-wrap">
+                                <i class="fas fa-phone"></i>
+                                <input type="tel" id="editPhone" placeholder="+91 98765 43210">
+                            </div>
+                            <span class="err-msg" id="editPhoneErr"></span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="editEmail">Email Address</label>
+                        <div class="input-wrap">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="editEmail" placeholder="your@email.com" readonly>
+                        </div>
+                        <small class="input-hint">Email change karna possible nahi hai.</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label for="editNewPass">New Password <span class="optional">(optional)</span></label>
+                            <div class="input-wrap">
+                                <i class="fas fa-lock"></i>
+                                <input type="password" id="editNewPass" placeholder="Leave blank to keep current">
+                                <button type="button" class="toggle-pass-btn" onclick="togglePass('editNewPass', this)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="editConfirmPass">Confirm Password</label>
+                            <div class="input-wrap">
+                                <i class="fas fa-lock"></i>
+                                <input type="password" id="editConfirmPass" placeholder="Re-enter new password">
+                                <button type="button" class="toggle-pass-btn" onclick="togglePass('editConfirmPass', this)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <span class="err-msg" id="editPassErr"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-save" id="saveBtn">
+                            <i class="fas fa-save"></i>
+                            <span>Save Changes</span>
+                        </button>
+                        <div class="save-status" id="saveStatus"></div>
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- My Bookings Card -->
+            <div class="profile-card">
+                <div class="card-title-row">
+                    <h3 class="card-title"><i class="fas fa-calendar-check"></i> My Bookings</h3>
+                    <a href="bookings.html" class="view-all-link">View All <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <div id="bookingsContainer">
+                    <div class="bookings-loading">
+                        <div class="spinner"></div>
+                        <span>Loading bookings...</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h3 class="logo-footer">Sewa<span>Now</span></h3>
+                <p>Connecting you with trusted local professionals for all your home service needs.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="worker_list.html">Find Workers</a></li>
+                    <li><a href="auth.html">Login / Register</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="#">Plumber</a></li>
+                    <li><a href="#">Electrician</a></li>
+                    <li><a href="#">Carpenter</a></li>
+                    <li><a href="#">Painter</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Contact</h4>
+                <ul>
+                    <li><i class="fas fa-phone"></i> +91 98765 43210</li>
+                    <li><i class="fas fa-envelope"></i> hello@sewanow.in</li>
+                    <li><i class="fas fa-map-marker-alt"></i> India</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Sewa Now Project | Designed by Your College Team</p>
+        </div>
+    </footer>
+
+    <script src="js/user-profile.js"></script>
+
+</body>
+</html>
