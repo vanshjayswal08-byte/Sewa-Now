@@ -14,7 +14,7 @@
 
     /* Firebase config — must match booking.html */
     var FIREBASE_CONFIG = {
-        apiKey            : "AIzaSyAC2z-W41mpwXUSTOqZd_4vfBoPyl4cvmk",
+        apiKey            : GOOGLE_API_KEY,
         authDomain        : "sewa-now.firebaseapp.com",
         projectId         : "sewa-now",
         storageBucket     : "sewa-now.firebasestorage.app",

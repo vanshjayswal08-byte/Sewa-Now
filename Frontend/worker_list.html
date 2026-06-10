@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/style.css">
     <!-- Worker List stylesheet -->
     <link rel="stylesheet" href="css/worker.css">
+    <script src="/Frontend/js/config.js"></script>
 </head>
 <body>
 
@@ -253,7 +254,7 @@
       import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
       const firebaseConfig = {
-        apiKey: "AIzaSyACz2-W4lmpwXUSTOqzd_4vfBoPyl4cvmk",
+        apiKey: GOOGLE_API_KEY,
         authDomain: "sewa-now.firebaseapp.com",
         projectId: "sewa-now",
         storageBucket: "sewa-now.firebasestorage.app",

@@ -9,3 +9,5 @@ backend/serviceAccountKey.json
 .env
 venv/
 .vscode/
+# Frontend Configs
+Frontend/js/config.js
